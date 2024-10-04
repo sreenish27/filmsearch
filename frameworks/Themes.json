@@ -1,0 +1,43 @@
+{
+    "introduction": {
+      "context": "",  
+      "primary_theme": "",  
+      "purpose": "" 
+    },
+    "themes": [
+      {
+        "theme_name": "",  
+        "exploration": "", 
+        "examples": ""  
+      }
+    ],
+    "social_context": {
+      "societal_mores": "",  
+      "historical_significance": ""  
+    },
+    "character_arcs": [
+      {
+        "character_name": "",  
+        "role": "",
+        "arc": "",  
+        "moral_dilemmas": ""
+      }
+    ],
+    "motifs_and_symbols": [
+      {
+        "symbol_or_motif": "", 
+        "meaning": "", 
+        "occurrences": "" 
+      }
+    ],
+    "narrative_structure": {
+      "recurring_elements": "",  
+      "story_elements": "" 
+    },
+    "critical_analysis": {
+      "dialogue_or_quotes": "", 
+      "philosophical_perspectives": "",  
+      "cultural_reflections": "" 
+    }
+  }
+  

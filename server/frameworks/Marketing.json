@@ -1,0 +1,86 @@
+{
+    "announcement_and_initial_promotion": {
+        "initial_announcements": "",
+        "release_of_updates": "",
+        "events_for_announcement": ""
+    },
+    "merchandise": {
+        "launch_date": "",
+        "merchandise_details": "",
+        "partnerships": "",
+        "distribution_channels": ""
+    },
+    "teaser_and_trailer_campaigns": {
+        "teaser_release": {
+            "release_date": "",
+            "content_revealed": "",
+            "platforms": "",
+            "audience_reaction": ""
+        },
+        "first_look_posters": {
+            "release_date": "",
+            "content": "",
+            "platforms": "",
+            "records": "",
+            "audience_reaction": ""
+        },
+        "full_trailer_release": {
+            "release_date": "",
+            "content_highlights": "",
+            "platforms": "",
+            "views_and_engagement": {
+                "views": "",
+                "likes": "",
+                "comments": "",
+                "shares": ""
+            },
+            "records": "",
+            "audience_reaction": ""
+        }
+    },
+    "social_media_campaigns": {
+        "platforms_used": "",
+        "engagement_metrics": {
+            "likes": "",
+            "shares": "",
+            "comments": "",
+            "followers_gained": ""
+        },
+        "influencer_and_celebrity_collaborations": "",
+        "hashtags_and_trending_topics": ""
+    },
+    "partnerships_and_collaborations": {
+        "brand_partnerships": {
+            "brand_name": "",
+            "type_of_partnership": "",
+            "promotional_materials": "",
+            "audience_reach": ""
+        },
+        "cross-promotions": {
+            "other_movies_or_products": "",
+            "promotional_events": "",
+            "co-branded_merchandise": ""
+        }
+    },
+    "records_and_milestones": {
+        "records_set": "",
+        "milestones_achieved": "",
+        "comparison_with_previous_films": ""
+    },
+    "regional_campaigns": {
+        "localized_posters_and_trailers": {
+            "languages": "",
+            "regional_specific_content": "",
+            "engagement_metrics": {
+                "views": "",
+                "likes": "",
+                "shares": ""
+            }
+        },
+        "regional_merchandising": {
+            "regions_targeted": "",
+            "types_of_merchandise": "",
+            "distribution_channels": ""
+        }
+    }
+}

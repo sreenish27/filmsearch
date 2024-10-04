@@ -1,0 +1,139 @@
+{
+      "preproduction": {
+        "conceptAndDevelopment": {
+          "initialIdea": "",
+          "inspiration": "",
+          "scriptDevelopment": {
+            "screenwriter": "",
+            "drafts": [],
+            "finalScript": ""
+          },
+          "genre": "",
+          "themes": [],
+          "targetAudience": "",
+          "projectPitch": "",
+          "budget": "",
+          "fundingSources": []
+        },
+        "teamAssembly": {
+          "director": "",
+          "producers": [],
+          "castingDirector": "",
+          "keyCrew": [
+            {
+              "role": "",
+              "name": ""
+            }
+          ]
+        },
+        "casting": {
+          "leadActors": [],
+          "supportingActors": [],
+          "extras": [],
+          "auditions": "",
+          "castingDecisions": [],
+          "actorSpecificDecisions": {
+            "revenueModel": "",
+            "uniqueRequirements": ""
+          }
+        },
+        "locationScouting": {
+          "geographicalLocation": "",
+          "specificLocations": [],
+          "permits": [],
+          "cinematicUniverseIntegration": {
+            "LCUIntegration": false,
+            "NOCDetails": ""
+          }
+        },
+        "designAndPlanning": {
+          "storyboards": [],
+          "setDesign": "",
+          "costumeDesign": "",
+          "makeupAndHair": "",
+          "visualEffectsPlanning": "",
+          "technologicalInnovations": [],
+          "schedules": {
+            "filmingSchedule": "",
+            "rehearsalSchedule": ""
+          },
+          "logistics": {
+            "equipment": [],
+            "transportation": [],
+            "accommodation": ""
+          }
+        }
+      },
+      "production": {
+        "filming": {
+          "startDate": "",
+          "endDate": "",
+          "locations": [],
+          "dailyShoot": [
+            {
+              "date": "",
+              "scenesShot": [],
+              "crewInvolved": []
+            }
+          ]
+        },
+        "directing": {
+          "style": "",
+          "challenges": [],
+          "notableDecisions": []
+        },
+        "acting": {
+          "performances": [],
+          "improvisations": [],
+          "characterDevelopment": ""
+        },
+        "onSetChallenges": {
+          "weather": "",
+          "technicalIssues": "",
+          "actorAvailability": "",
+          "other": []
+        }
+      },
+      "postproduction": {
+        "editing": {
+          "editor": "",
+          "process": "",
+          "softwareUsed": "",
+          "timeline": ""
+        },
+        "soundDesign": {
+          "soundEffects": [],
+          "dialogueEditing": "",
+          "musicScore": {
+            "composer": "",
+            "recordingProcess": ""
+          },
+          "finalMix": ""
+        },
+        "visualEffects": {
+          "vfxTeam": [],
+          "techniquesUsed": "",
+          "keyScenes": [],
+          "specialEffectsDetails": {
+            "creatureCreation": "",
+            "cost": ""
+          }
+        },
+        "colorGrading": {
+          "colorist": "",
+          "style": "",
+          "softwareUsed": ""
+        },
+        "distribution": {
+          "distributionStrategy": "",
+          "releaseDate": "",
+          "marketingCampaign": "",
+          "premieresAndFestivals": [],
+          "postProductionChallenges": {
+            "CGITime": "",
+            "studiosInvolved": []
+          }
+        }
+      }
+    }
+  

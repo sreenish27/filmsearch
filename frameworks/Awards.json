@@ -1,0 +1,32 @@
+{
+      "ceremonies": [
+        {
+          "name": "",
+          "year": "",
+          "awards": [
+            {
+              "category": "",
+              "recipient": "",
+              "result": "",
+              "reference": ""
+            }
+          ]
+        }
+      ],
+      "specialtitles": [
+        {
+          "title": "",
+          "bestowedBy": "",
+          "individual": "",
+          "date": ""
+        }
+      ],
+      "notablecomments": [
+        {
+          "individual": "",
+          "comment": "",
+          "context": ""
+        }
+      ]
+  }
+  

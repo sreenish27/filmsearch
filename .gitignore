@@ -1,0 +1,52 @@
+# JSON data files
+tamilfilms.jsonl
+tamilfilms_structured.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+*.envrc
+*.DS_Store
+filmenv/
+
+# Local environment and sensitive files
+.env
+.env.*
+
+# Server
+server/node_modules/
+server/.env
+server/f_images.jsonl
+
+# Client
+client/node_modules/
+client/.pnp/
+client/.pnp.js
+client/.yarn/install-state.gz
+client/coverage/
+client/.next/
+client/out/
+client/build/
+client/.DS_Store
+client/*.pem
+client/.env*.local
+client/.vercel
+client/*.tsbuildinfo
+client/next-env.d.ts
+client/.env
+
+# Debug logs
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+
+# Misc
+client/.DS_Store
+
+# OS generated files
+.DS_Store
+Thumbs.db

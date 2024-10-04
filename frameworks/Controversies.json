@@ -1,0 +1,52 @@
+{
+      "incidents": [
+        {
+          "issue": "",
+          "details": [
+            {
+              "organization": "",
+              "individual": "",
+              "actionRequested": "",
+              "date": "",
+              "response": ""
+            }
+          ]
+        }
+      ],
+      "legalactions": [
+        {
+          "organization": "",
+          "individual": "",
+          "complaintDetails": "",
+          "date": "",
+          "result": ""
+        }
+      ],
+      "productionissues": [
+        {
+          "issue": "",
+          "details": [
+            {
+              "groupAffected": "",
+              "concern": "",
+              "actionTaken": "",
+              "response": ""
+            }
+          ]
+        }
+      ],
+      "censorshipandmodifications": [
+        {
+          "aspect": "",
+          "details": [
+            {
+              "entity": "",
+              "action": "",
+              "specificChanges": "",
+              "impactOnFilm": ""
+            }
+          ]
+        }
+      ]
+    }
+  

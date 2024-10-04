@@ -1,0 +1,13 @@
+{
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/api/userquery",
+      "destination": "https://filmsearchserver.vercel.app/api/userquery"
+    },
+    {
+      "source": "/api/answerquery",
+      "destination": "https://filmsearch-i1r9.onrender.com/answerquery"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+uvicorn
+fastapi
+groq
+numpy
+json_repair
+python-dotenv
+sentence-transformers

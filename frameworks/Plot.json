@@ -1,0 +1,145 @@
+{
+      "genre": [],
+      "setting": {
+        "time": {
+          "period": "",
+          "duration": ""
+        },
+        "place": {
+          "geographic": "",
+          "specific": []
+        },
+        "context": {
+          "historical": "",
+          "social": "",
+          "cultural": ""
+        },
+        "atmosphere": ""
+      },
+      "characters": [
+        {
+          "name": "",
+          "role": "",
+          "description": "",
+          "backstory": "",
+          "goals": [],
+          "obstacles": [],
+          "arc": ""
+        }
+      ],
+      "plotstructure": {
+        "exposition": "",
+        "risingAction": [
+          {
+            "event": "",
+            "significance": ""
+          }
+        ],
+        "climax": "",
+        "fallingAction": [
+          {
+            "event": "",
+            "significance": ""
+          }
+        ],
+        "resolution": ""
+      },
+      "conflicts": {
+        "main": {
+          "type": "",
+          "description": ""
+        },
+        "secondary": [
+          {
+            "type": "",
+            "description": "",
+            "relatedCharacters": []
+          }
+        ]
+      },
+      "plotpoints": [
+        {
+          "name": "",
+          "description": "",
+          "impact": "",
+          "relatedCharacters": []
+        }
+      ],
+      "resolution": {
+        "outcome": "",
+        "consequences": [],
+        "unresolvedThreads": []
+      },
+      "themes": [
+        {
+          "name": "",
+          "exploration": ""
+        }
+      ],
+      "symbolism": [
+        {
+          "symbol": "",
+          "meaning": "",
+          "occurrences": []
+        }
+      ],
+      "narrative": {
+        "pointOfView": "",
+        "tense": "",
+        "style": "",
+        "tone": ""
+      },
+      "worldbuilding": {
+        "rules": [],
+        "uniqueElements": [],
+        "history": "",
+        "socialStructure": "",
+        "technology": ""
+      },
+      "timeline": [
+        {
+          "event": "",
+          "timePoint": "",
+          "significance": ""
+        }
+      ],
+      "subplots": [
+        {
+          "description": "",
+          "relatedCharacters": [],
+          "resolution": ""
+        }
+      ],
+      "motifs": [
+        {
+          "name": "",
+          "occurrences": [],
+          "significance": ""
+        }
+      ],
+      "structure": {
+        "actStructure": "",
+        "nonLinearElements": [],
+        "parallelStorylines": []
+      },
+      "literarydevices": [
+        {
+          "name": "",
+          "usage": "",
+          "effect": ""
+        }
+      ],
+      "criticalmoments": [
+        {
+          "description": "",
+          "impact": "",
+          "relatedCharacters": []
+        }
+      ],
+      "openquestions": [],
+      "audienceengagement": {
+        "hooks": [],
+        "revealsAndTwists": [],
+        "emotionalHighPoints": []
+      }
+    }

@@ -1,0 +1,79 @@
+{
+      "theatrical": {
+        "initialReleaseDate": "",
+        "formats": [
+          
+        ],
+        "languages": [
+          ""
+        ],
+        "regionSpecificReleases": [
+          {
+            "region": "",
+            "releaseDate": "",
+            "classification": {
+              "initial": {
+                "rating": "",
+                "reason": "",
+                "cutDuration": ""
+              },
+              "reclassified": {
+                "rating": "",
+                "reason": "",
+                "releaseDate": ""
+              }
+            }
+          }
+        ],
+        "notableVersions": [
+          {
+            "versionDescription": ""
+          }
+        ]
+      },
+      "distribution": {
+        "regionalDistributors": [
+          {
+            "region": "",
+            "distributor": "",
+            "amount": ""
+          }
+        ]
+      },
+      "prebookings": {
+        "startDates": {
+          "": ""
+        },
+        "salesData": [
+          {
+            "region": "",
+            "firstDayTicketsSold": "",
+            "firstDayCollection": "",
+            "premiereTicketsSold": "",
+            "day1Collection": ""
+          }
+        ]
+      },
+      "prereleasebusiness": {
+        "totalPreReleaseRecovery": "",
+        "nonTheatricalRights": "",
+        "overseasTheatricalRights": {
+          "amount": "",
+          "distributor": ""
+        }
+      },
+      "homemedia": {
+        "digitalStreaming": {
+          "platform": "",
+          "releaseDates": {
+          },
+          "languages": [
+            ""
+          ]
+        },
+        "satelliteRights": {
+          "network": ""
+        }
+      }
+    }
+  

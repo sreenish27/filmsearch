@@ -1,0 +1,31 @@
+{
+  "name": "socket-chat-example",
+  "version": "0.0.1",
+  "main": "server.js",
+  "description": "my first socket.io app",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.2",
+    "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "punycode.js": "^2.3.1",
+    "python-shell": "^5.0.0"
+  },
+  
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  }
+}
