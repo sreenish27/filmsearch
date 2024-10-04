@@ -1,7 +1,7 @@
 import { supabase } from "../server.js";
 import axios from "axios"
 import { frameworks_dict } from "../server.js";
-import {queryprocessapiEndpoint, structureQueryEndpoint, concreteinfoEndpoint, unstructuredinfoEndpoint} from "../config.js"
+import {queryprocessapiEndpoint, structureQueryEndpoint, concreteinfoEndpoint, unstructuredinfoEndpoint, encodeEndpoint} from "../config.js"
 
 //this is the important sauce which will be the foundation of my search helps in choosing which columns to do similarity search with
 const film_categories = {
@@ -168,7 +168,7 @@ export const processquery = async (query) => {
                             content: query,
                             framework: frameworks_dict[uniqframework_list[frame]]
                         });
-                        const vec_response = await axios.post(`http://127.0.0.1:8000/encode`, {
+                        const vec_response = await axios.post(encodeEndpoint, {
                             sentence: response.data[0]
                         });
                         vec_framework_dict[uniqframework_list[frame]] = vec_response.data;
