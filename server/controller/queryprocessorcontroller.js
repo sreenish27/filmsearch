@@ -1,7 +1,11 @@
 import { supabase } from "../server.js";
 import axios from "axios"
 import { frameworks_dict } from "../server.js";
+import { jsonrepair } from 'jsonrepair';
 import {queryprocessapiEndpoint, structureQueryEndpoint, concreteinfoEndpoint, unstructuredinfoEndpoint, encodeEndpoint} from "../config.js"
+import pkg from 'body-parser';
+
+const { json } = pkg;
 
 //this is the important sauce which will be the foundation of my search helps in choosing which columns to do similarity search with
 const film_categories = {
@@ -119,8 +123,9 @@ export const processquery = async (query) => {
                 categorylist: categorylist
                 });
             
-                const sel_categories = response.data[0];
+                const sel_categories = jsonrepair(response.data[0]);
                 const sel_categories_list = JSON.parse(sel_categories.replace(/'/g, '"'));
+                console.log(sel_categories_list[0])
 
                 let search_dict = {};
                 let film_list = [];
@@ -138,8 +143,8 @@ export const processquery = async (query) => {
                         })
                         const concrete_info = con_response.data[0];
                         console.log(concrete_info)
-                        if(concrete_info != 'Nopeople'){
-                            const concrete_infolist = JSON.parse(concrete_info.replace(/'/g, '"'));
+                        if(concrete_info != 'Nopeople' || concrete_info != 'No people'){
+                            const concrete_infolist = jsonrepair(concrete_info)
                             console.log(concrete_infolist)
                             //now run the supabase sql function to get all the films
                             //a variable to select the common films from multiple lists
@@ -149,7 +154,6 @@ export const processquery = async (query) => {
                                 const { data: movie_list_concrete, count } = await supabase.rpc('ge_picture_keyword', {
                                     p_keyword: concrete_infolist[i]
                                 }, { count: 'exact' });
-                                console.log(movie_list_concrete)
                                 movie_list_concrete.forEach(row => {
                                     indi_filmlist.push(row.title);
                                 });
@@ -195,7 +199,6 @@ export const processquery = async (query) => {
                         for (let movie in movie_list.data) {
                             film_list.push(movie_list.data[movie]);
                         }
-                        console.log(movie_list.data)
                         let film_details_list = [];
                         film_list = [...new Set(film_list)]
                         for (let film in film_list) {
@@ -245,7 +248,6 @@ export const processquery = async (query) => {
                             m_count: 1,
                             title_list: film_list
                         });
-                        console.log(movie_list.data)
                         let film_details_list = [];
                         const movie_list_final = [...new Set(movie_list.data)]
                         for (let film in movie_list_final) {
@@ -295,7 +297,7 @@ export const processquery = async (query) => {
                 const con_response = await axios.post(concreteinfoEndpoint, {
                     content:query
                 })
-                const concrete_info = con_response.data[0];
+                const concrete_info = jsonrepair(con_response.data[0]);
                 const concrete_infolist = JSON.parse(concrete_info.replace(/'/g, '"'));
                 console.log(concrete_infolist)
                 //now run the supabase sql function to get all the films
