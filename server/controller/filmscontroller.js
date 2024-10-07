@@ -19,7 +19,7 @@ export const writeFilmsToDatabase = async (film) => {
     }
     //inserting the data to the 'films' table
     const { error } = await supabase
-            .from('films')
+            .from('tamilfilms')
             .insert({ title: title, film_details: filmDetails });
 
         if (error) {

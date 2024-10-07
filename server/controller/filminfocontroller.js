@@ -1,5 +1,6 @@
 import { supabase } from "../server.js";
 import axios from "axios";
+import { encodeEndpoint } from "../config.js";
 
 //this function will do the following:
 //1. get each film from the film object
@@ -103,7 +104,7 @@ export const writeFilmDetailsToDatabase = async (film) => {
         //a flag to know when the generalinfo field starts
         let flag = false;
         //first insert the title and entire structured data of a field
-        const { data, error } = await supabase.rpc('insert_data_txt', {t_name: 'filminfo', col: 'title', val: title})
+        const { data, error } = await supabase.rpc('insert_data_txt', {t_name: 'tamilfilminfo', col: 'title', val: title})
         for (let arr in filmInfoArray){
             if (filmInfoArray[arr][0] == 'generalinfo'){
                 flag = true;
@@ -114,13 +115,15 @@ export const writeFilmDetailsToDatabase = async (film) => {
                 filmdetailsdict[filmInfoArray[arr][0]] = filmInfoArray[arr][1]
                 //now create a column with the field name in the  'filminfo' table in the database
                 const col_string = `ADD COLUMN ${columname_mapping[filmInfoArray[arr][0]]} vector(384)`;
-                const { data, error } = await supabase.rpc('add_cols', {t_name: 'filminfo', cols: col_string})
+                const { data, error } = await supabase.rpc('add_cols', {t_name: 'tamilfilminfo', cols: col_string})
                 //vectorize the data and store it in a variable
-                const response = await axios.get(`http://127.0.0.1:8000/${filmInfoArray[arr][1]}`);
+                const response = await axios.post(encodeEndpoint, {
+                    sentence: filmInfoArray[arr][1]
+                });
                 const vec_data = response.data;
                 try{
                     //now insert this data in to the newly created column above
-                    const { data, error } = await supabase.rpc('insert_data_vec', {t_name: 'filminfo', col: columname_mapping[filmInfoArray[arr][0]], title: title, val: vec_data})
+                    const { data, error } = await supabase.rpc('insert_data_vec', {t_name: 'tamilfilminfo', col: columname_mapping[filmInfoArray[arr][0]], title: title, val: vec_data})
                 } catch(err){
                     console.error(err)
                 }               
@@ -128,7 +131,7 @@ export const writeFilmDetailsToDatabase = async (film) => {
         }
         try{
             //inserting the structured data starting from generalinfo
-            const { data, error } = await supabase.rpc('insert_data_json', {t_name: 'filminfo', col: 'rawdata', title: title, val: filmdetailsdict})
+            const { data, error } = await supabase.rpc('insert_data_json', {t_name: 'tamilfilminfo', col: 'rawdata', title: title, val: filmdetailsdict})
         } catch(err){
             console.error(err)
         }

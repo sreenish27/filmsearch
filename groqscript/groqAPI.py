@@ -204,7 +204,7 @@ async def generate_sentence(request: Concreteinfo):
     prompt = (
         f"Read the user input and understand it\n"
         f"Now, extract all the names of people and entities from this input and list them\n"
-        f"IF THERE IS NOTHING LIKE THAT, just give me 'Nopeople', AGAIN IF YOU DO NOT FIND ANYTHING TO EXTRACT, give 'Nopeople'\n"
+        f"IF THERE IS NOTHING LIKE THAT, just give me ['Nopeople'] inside a list, AGAIN IF YOU DO NOT FIND ANYTHING TO EXTRACT, give ['Nopeople'] inside a list\n"
         f"Construct a concise list, DO NOT HALLUCINATE ANYTHING EXTRA. DO NOT ADD UNNECESSARY COMMENTS\n"
         f"THE OUTPUT MUST BE JUST A LIST THAT CAPTURES ALL THE EXTRACTED NAMES OR CONCRETE INFORMATION AND NOTHING ELSE\n"
         f"AGAIN THE OUTPUT MUST BE A LIST IN THIS FORMAT ['inside this all the words']"

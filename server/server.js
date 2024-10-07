@@ -2,11 +2,13 @@ import express from "express";
 import session from "express-session";
 import { port, supabaseUrl, supabaseKey, clientUrl, sessionSecret } from "./config.js";
 import { createClient } from "@supabase/supabase-js";
+import { writeFilmsToDatabase } from "./controller/filmscontroller.js";
+import { writeFilmDetailsToDatabase } from "./controller/filminfocontroller.js";
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import readline from 'readline';
-import { processquery } from "./controller/queryprocessorcontroller.js";
+import { processquery } from "./controller/queryprocessorcontrollertamiltest.js";
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
@@ -91,7 +93,7 @@ export const frameworks_dict = frameworks;
 
 export const frameworks_list = Object.keys(frameworks_dict);
 
-// export const filmData = await loadFilms('../filmdata/tamilfilms_structured.jsonl');
+// export const filmData = await loadFilms('../filmdata/tamilfilms.jsonl');
 
 // //looping through all the films in the array and writing them to the database
 // for (let i=0; i<filmData.length; i++) {

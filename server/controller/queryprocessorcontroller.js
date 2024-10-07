@@ -115,7 +115,7 @@ export const processquery = async (query) => {
             const unstruct_response = await axios.post(unstructuredinfoEndpoint, {
                 content: query,
             });
-            //a case where if there is nothing to extract which is unstructured from the query
+            //a case where if there is something to extract which is unstructured from the query
             if (unstruct_response.data != 'Noinfo'){
                 // Process query
                 const response = await axios.post(queryprocessapiEndpoint, {
