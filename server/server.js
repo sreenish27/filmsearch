@@ -93,13 +93,13 @@ export const frameworks_dict = frameworks;
 
 export const frameworks_list = Object.keys(frameworks_dict);
 
-// export const filmData = await loadFilms('../filmdata/tamilfilms.jsonl');
+export const filmData = await loadFilms('../filmdata/americanfilms.jsonl');
 
-// //looping through all the films in the array and writing them to the database
-// for (let i=0; i<filmData.length; i++) {
-//     await writeFilmsToDatabase(filmData[i]);
-//     await writeFilmDetailsToDatabase(filmData[i]);
-// }
+//looping through all the films in the array and writing them to the database
+for (let i=0; i<filmData.length; i++) {
+    await writeFilmsToDatabase(filmData[i]);
+    await writeFilmDetailsToDatabase(filmData[i]);
+}
 
 // const test = await processquery('films that talk about tamil nadu politics');
 

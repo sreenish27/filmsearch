@@ -202,14 +202,17 @@ class Concreteinfo(BaseModel):
 async def generate_sentence(request: Concreteinfo):
     # Construct the prompt for the API
     prompt = (
-        f"Read the user input and understand it\n"
-        f"Now, extract all the names of people, filmname and entities from this input and list them\n"
-        f"IF THERE IS NOTHING LIKE THAT, just give me ['Nopeople'] inside a list, AGAIN IF YOU DO NOT FIND ANYTHING TO EXTRACT, give ['Nopeople'] inside a list\n"
-        f"Construct a concise list, DO NOT HALLUCINATE ANYTHING EXTRA. DO NOT ADD UNNECESSARY COMMENTS\n"
-        f"THE OUTPUT MUST BE JUST A LIST THAT CAPTURES ALL THE EXTRACTED NAMES OR CONCRETE INFORMATION AND NOTHING ELSE\n"
-        f"AGAIN THE OUTPUT MUST BE A LIST IN THIS FORMAT ['inside this all the words']"
+        f"Read the user input carefully and understand the context of each word. Extract words only if they represent concrete film titles, people, or named entities.\n"
+        f"If a word is used in a general or contextual reference (e.g., part of a category, genre, or reference to mythology, history, etc.), DO NOT extract that word.\n"
+        f"Ignore words that are part of references to broader themes, like epics, mythology, history, or genres, unless they clearly represent a standalone film title, person, or entity.\n"
+        f"Now, extract all the names of people, film titles, and entities from this input and list them.\n"
+        f"If the user types just one word that clearly represents a film title, person, or entity, extract that word.\n"
+        f"If there is nothing concrete to extract, return ['Nopeople'] inside a list.\n"
+        f"DO NOT add extra comments or hallucinate additional information. The output must be a concise list capturing only valid names or titles.\n"
+        f"Again, if you do not find anything to extract, return ['Nopeople'] inside a list and nothing else.\n"
         f"Content:\n{request.content}\n\n"
     )
+
     # Continue with the API call using the constructed prompt
 
 
@@ -242,10 +245,14 @@ class unstructuredInfo(BaseModel):
 async def generate_sentence(request: unstructuredInfo):
     # Construct the prompt for the API
     prompt = (
-        f"Read the user input and understand it\n"
-        f"Now, extract all the descriptive or thematic information from this input while ignoring the names of people or specific entities involved\n"
-        f"Construct a concise paragraph or couple of sentences summarizing the remaining information\n"
-        f"IF THERE NOTHING EXTRACT, PLEASE JUST RETURN 'Noinfo', DO NOT WRITE ANYTHING ELSE. AGAIN, JUST 'Noinfo'\n"
+        f"Read the user input carefully and fully understand its intent.\n"
+        f"Now, extract all descriptive or thematic information while ignoring names of people or specific entities involved.\n"
+        f"Expand on the extracted information by adding more detail that directly relates to the specific context of the query.\n"
+        f"For instance, if the input is 'films inspired by foreign films,' your expansion should focus on explaining how particular films were influenced by other foreign films, avoiding broad cultural or thematic elaborations that stray from the user's query.\n"
+        f"Ensure the expanded content stays focused on the original query's meaning, without adding irrelevant or overly generalized information. Do not add examples\n"
+        f"Construct a concise paragraph or couple of sentences summarizing and elaborating on the extracted information in a way that helps clarify the query.\n"
+        f"The output must be constructed in such a way that it does not have any unnecessary stuff going away from the query intent\n"
+        f"If there is nothing relevant to extract or expand upon, just return 'Noinfo' and nothing else.\n"
         f"Content:\n{request.content}\n\n"
     )
     # Continue with the API call using the constructed prompt
