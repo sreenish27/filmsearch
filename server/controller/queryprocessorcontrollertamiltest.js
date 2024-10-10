@@ -199,7 +199,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
             const category_cols = Object.keys(film_categories[category])
             //now loop through the columns and get the film list
             for (let j in category_cols) {
-                const movie_list = await supabase.rpc('similarity_search', {
+                const movie_list = await supabase.rpc('similar_search', {
                 t_name: 'tamilfilminfo',
                 c_name: category_cols[j],
                 q_embedding: vec_response.data,
@@ -225,7 +225,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
             const category_cols = Object.keys(film_categories[category])
                 //now loop through the columns and get the film list
                 for (let j in category_cols) {
-                    const movie_list = await supabase.rpc('targeted_similarity_search', {
+                    const movie_list = await supabase.rpc('target_similar_search', {
                     t_name: 'tamilfilminfo',
                     c_name: category_cols[j],
                     q_embedding: vec_response.data,
@@ -233,6 +233,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
                     m_count: 1,
                     title_list: filmlist
                 });
+
                     //pushing all the films into a single list
                     for (let movie in movie_list.data) {
                         vectorfilmlist.push(movie_list.data[movie]);
