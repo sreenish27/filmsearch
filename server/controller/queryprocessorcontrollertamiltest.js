@@ -125,7 +125,7 @@ const getfilmdetails = async (filmtitle) => {
     film_dict['o_details'] = rawdata.data[0]['result']['rawdata'];
     
     const image = await supabase.rpc('g_film_image', {
-        table_name: 'films',
+        table_name: 'tamilfilms',
         column_name: 'image',
         title: filmtitle
     });

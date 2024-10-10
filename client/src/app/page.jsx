@@ -403,10 +403,10 @@ export default function FilmSearch() {
           >
             <div className="relative aspect-[2/3] w-full">
             <Image
-              src={film.image && film.image !== "noimage" ? `data:image/jpeg;base64,${film.image}` : "/film.jpg"}
+              src={film.image && film.image !== "noimage" ? film.image : "/film.jpg"}
               alt={film.title}
-            layout="fill"
-            objectFit="cover"
+              layout="fill"
+              objectFit="cover"
             />
             </div>
             <div className="p-4">
@@ -447,7 +447,7 @@ export default function FilmSearch() {
           <div className="flex-grow">
             <h2 className="text-3xl font-semibold mb-4">{selectedFilm.title}</h2>
             <Image
-              src={selectedFilm.image && selectedFilm.image !== "noimage" ? `data:image/jpeg;base64,${selectedFilm.image}` : "/film.jpg"}
+              src={selectedFilm.image && selectedFilm.image !== "noimage" ? selectedFilm.image : "/film.jpg"}
               alt={selectedFilm.title}
               width={500}
               height={1000}

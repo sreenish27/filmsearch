@@ -202,16 +202,15 @@ class Concreteinfo(BaseModel):
 async def generate_sentence(request: Concreteinfo):
     # Construct the prompt for the API
     prompt = (
-        f"Read the user input carefully and understand the context of each word. Extract words only if they represent concrete film titles, people, or named entities.\n"
-        f"If a word is used in a general or contextual reference (e.g., part of a category, genre, or reference to mythology, history, etc.), DO NOT extract that word.\n"
-        f"Ignore words that are part of references to broader themes, like epics, mythology, history, or genres, unless they clearly represent a standalone film title, person, or entity.\n"
-        f"Now, extract all the names of people, film titles, and entities from this input and list them.\n"
-        f"If the user types just one word that clearly represents a film title, person, or entity, extract that word.\n"
-        f"If there is nothing concrete to extract, return ['Nopeople'] inside a list.\n"
-        f"DO NOT add extra comments or hallucinate additional information. The output must be a concise list capturing only valid names or titles.\n"
-        f"Again, if you do not find anything to extract, return ['Nopeople'] inside a list and nothing else.\n"
-        f"Content:\n{request.content}\n\n"
-    )
+    f"Carefully analyze the input, focusing on identifying concrete film titles, specific individuals, or named entities. Your goal is to extract only those that are directly relevant as entities.\n"
+    f"If a name or term appears in the context of a broader idea, genre, philosophical reference, or thematic discussion (such as 'Franz Kafka' in the phrase 'films that use Franz Kafka's philosophy'), DO NOT extract it. Such names are not standalone film titles or people in this context.\n"
+    f"Example: If the input is 'films that use Franz Kafka's philosophy,' you should NOT extract 'Franz Kafka' since it's part of a thematic reference, not a named entity in the film industry.\n"
+    f"Extract a word only if it unambiguously represents a film title, a person directly related to the film industry, or a distinct entity within the film context.\n"
+    f"Do not extract words that are part of references to genres, themes, philosophies, literary works, mythologies, or historical references, unless they are explicitly being mentioned as films or filmmakers.\n"
+    f"If there is nothing concrete to extract, return ['Nopeople'] inside a list.\n"
+    f"Be careful to avoid extracting names or terms that are not clearly film-related entities, people, or titles.\n"
+    f"Input content:\n{request.content}\n\n"
+)
 
     # Continue with the API call using the constructed prompt
 

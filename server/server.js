@@ -93,7 +93,7 @@ export const frameworks_dict = frameworks;
 
 export const frameworks_list = Object.keys(frameworks_dict);
 
-// export const filmData = await loadFilms('../filmdata/americanfilms.jsonl');
+// export const filmData = await loadFilms('../filmdata/americanfilms1.jsonl');
 
 // //looping through all the films in the array and writing them to the database
 // for (let i=0; i<filmData.length; i++) {
@@ -104,6 +104,51 @@ export const frameworks_list = Object.keys(frameworks_dict);
 // const test = await processquery('films that talk about tamil nadu politics');
 
 // export const filmsearch_list = test
+
+//insert images code
+
+// // Read the JSON file
+// const jsonData = fs.readFileSync('poster_urls.jsonl', 'utf8');
+// const lines = jsonData.split('\n');
+
+// // Iterate through the lines and update the tamilfilms table
+// async function updatePosterUrls() {
+//   for (const line of lines) {
+//     try {
+//       const poster = JSON.parse(line);
+//       const { filmname, poster_url } = poster;
+
+//       if (poster_url && poster_url.includes('.jpg')) {
+//         // Update the tamilfilms table with the poster URL
+//         const { data, error } = await supabase
+//           .from('tamilfilms')
+//           .update({ image: poster_url })
+//           .eq('title', filmname);
+
+//         if (error) {
+//           console.error(`Error updating poster URL for ${filmname}:`, error);
+//         } else {
+//           console.log(`Poster URL updated for ${filmname}`);
+//         }
+//       } else {
+//         console.log(`Skipping update for ${filmname} - poster URL does not contain ".jpg"`);
+//       }
+//     } catch (error) {
+//       console.error('Error parsing JSON:', error);
+//       console.log('Skipping invalid entry');
+//     }
+//   }
+// }
+
+// // Run the update function
+// updatePosterUrls()
+//   .then(() => {
+//     console.log('Poster URL update completed');
+//   })
+//   .catch((error) => {
+//     console.error('Error updating poster URLs:', error);
+//   });
+
 
 //an endpoint to catch the query from the client side and give the list of films back, handled appropriately for multiple sessions
 app.post('/api/userquery', async (req, res) => {
