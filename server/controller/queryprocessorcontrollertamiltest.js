@@ -105,29 +105,36 @@ const categorylist = Object.keys(film_categories);
 const getfilmdetails = async (filmtitle) => {
     let film_dict = {}
     //get all the film details using supabase sql functions
-    film_dict['title'] = filmtitle
-                
-    const film_details = await supabase.rpc('get_film_details', {
+    
+
+    const movietitle = await supabase.rpc('get_movie_details', {
         table_name: 'tamilfilms',
-        column_name: 'film_details',
-        title: filmtitle
+        column_name: 'title',
+        id: filmtitle
     });
 
+    film_dict['title'] = movietitle.data[0].result.title
                 
+    const film_details = await supabase.rpc('get_movie_details', {
+        table_name: 'tamilfilms',
+        column_name: 'film_details',
+        id: filmtitle
+    });
+
     film_dict['b_details'] = film_details.data[0]['result']['film_details'];
                 
-    const rawdata = await supabase.rpc('get_film_details', {
+    const rawdata = await supabase.rpc('get_movie_details', {
         table_name: 'tamilfilminfo',
         column_name: 'rawdata',
-        title: filmtitle
+        id: filmtitle
     });
                 
     film_dict['o_details'] = rawdata.data[0]['result']['rawdata'];
     
-    const image = await supabase.rpc('g_film_image', {
+    const image = await supabase.rpc('g_movie_image', {
         table_name: 'tamilfilms',
         column_name: 'image',
-        title: filmtitle
+        id: filmtitle
     });
 
     if(image.data[0] == null || image.data[0] == {result : null}){
@@ -142,23 +149,29 @@ const getfilmdetails = async (filmtitle) => {
 
 //a function to perform keyword search on a given list of words
 const keywordsearch = async (concreteinfolist) => {
-    //convert string to list
-    let common_films = []
+    // Convert string to list
+    let common_films = [];
     for (let i in concreteinfolist) {
-        let film_list = []
-        const { data: movie_list_concrete, count } = await supabase.rpc('g_picture_keyword', {
+        let film_list = [];
+        const { data: movie_list_concrete, count } = await supabase.rpc('g_pic_keyword', {
             p_keyword: concreteinfolist[i]
         }, { count: 'exact' });
-        //push the films to film_list
+
+        console.log(movie_list_concrete)
+        
+        // Push the film ids to film_list
         movie_list_concrete.forEach(row => {
-            film_list.push(row.title);
+            film_list.push(row.id);  // Now storing id instead of title
         });
-        common_films.push(film_list)
+        common_films.push(film_list);
     }
-    //now perform an operation to get all the items from all the lists and create a seperate list
+    
+    // Perform an operation to get all the items from all the lists and create a separate list
     const keywordfilms = common_films.reduce((common, arr) => common.filter(item => arr.includes(item)));
-    return keywordfilms; 
+    
+    return keywordfilms;    
 }
+
 
 //a function to perform similarity search, with a list or without a list, have a case where if list is empty you just do similarity search for all the films
 const vectorfilm_search = async (filmlist, unstructquery) => {
