@@ -245,12 +245,11 @@ async def generate_sentence(request: unstructuredInfo):
     # Construct the prompt for the API
     prompt = (
         f"Read the user input carefully and fully understand its intent.\n"
-        f"Now, extract all descriptive or thematic information while ignoring names of people or specific entities involved.\n"
-        f"Expand on the extracted information by adding more detail that directly relates to the specific context of the query.\n"
-        f"For instance, if the input is 'films inspired by foreign films,' your expansion should focus on explaining how particular films were influenced by other foreign films, avoiding broad cultural or thematic elaborations that stray from the user's query.\n"
-        f"Ensure the expanded content stays focused on the original query's meaning, without adding irrelevant or overly generalized information. Do not add examples\n"
-        f"Construct a concise paragraph or couple of sentences summarizing and elaborating on the extracted information in a way that helps clarify the query.\n"
-        f"The output must be constructed in such a way that it does not have any unnecessary stuff going away from the query intent\n"
+        f"Extract all relevant descriptive or thematic information while ignoring names of people, specific companies, or entities unless directly central to the query.\n"
+        f"Expand the extracted information by adding detail that directly relates to the specific context of the query without introducing irrelevant or generalized content.\n"
+        f"For instance, if the query is 'films inspired by foreign films,' focus specifically on how certain films were influenced by foreign films, avoiding unrelated cultural or thematic elaboration.\n"
+        f"Ensure the expanded content stays fully aligned with the query’s focus.\n"
+        f"Construct a concise paragraph or a couple of sentences that clearly summarize and expand on the original query, without including unnecessary or tangential details.\n"
         f"If there is nothing relevant to extract or expand upon, just return 'Noinfo' and nothing else.\n"
         f"Content:\n{request.content}\n\n"
     )
@@ -372,25 +371,26 @@ class answerQuery(BaseModel):
     question: str
     filmdetails: dict  # Allows for any nested dictionary structure with empty fields
     filmdata: dict
+    context: str  # Add this field to pass the previous conversation context
 
 @app.post("/answerquery")
 async def extract_data(request: answerQuery):
-    # Construct the prompt for the API
+    # Construct the prompt for the API, including the context of the last 7 exchanges
     prompt = (
-        f"Understand the question asked by the user\n"
-        f"Then based on the question read through the Basic details and Other Film data\n"
-        f"Craft an engaging answer based on the question asked and give that string as the output\n"
-        f"If there is no relvant content in Basic details or Other film data tell the user that relevant content is not available\n"
-        f"Keep your answers always natural do not tell where you are getting or not getting your info from\n"
-        f"Content:\n{request.question}\n\n"
+        f"Understand the ongoing conversation and question asked by the user.\n"
+        f"Here's the context of the recent conversation:\n"
+        f"{request.context}\n"
+        f"Now, based on the latest question and this conversation, read through the Basic details and Other Film data.\n"
+        f"Craft an engaging answer based on the question and conversation context, and give that string as the output.\n"
+        f"If there is no relevant content in Basic details or Other film data, tell the user that relevant content is not available.\n"
+        f"Keep your answers always natural and conversational, without explicitly stating where you're getting the information from.\n"
+        f"Latest Question:\n{request.question}\n\n"
         f"Basic Details:\n{request.filmdetails}\n"
         f"Other Film data:\n{request.filmdata}\n"
     )
-    # Continue with the API call using the constructed prompt
-
 
     try:
-        # Use the Groq client to create a chat completion
+        # Use the Groq client to create a chat completion with the constructed prompt
         chat_completion = client.chat.completions.create(
             messages=[
                 {
@@ -409,4 +409,3 @@ async def extract_data(request: answerQuery):
         # Log the exception for debugging
         logger.error("An error occurred", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
-

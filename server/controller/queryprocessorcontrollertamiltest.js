@@ -203,7 +203,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
                 t_name: 'tamilfilminfo',
                 c_name: category_cols[j],
                 q_embedding: vec_response.data,
-                m_threshold: 0.3,
+                m_threshold: 0.27,
                 m_count: 1
             });
                 //pushing all the films into a single list
@@ -229,7 +229,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
                     t_name: 'tamilfilminfo',
                     c_name: category_cols[j],
                     q_embedding: vec_response.data,
-                    m_threshold: 0.3,
+                    m_threshold: 0.27,
                     m_count: 1,
                     title_list: filmlist
                 });

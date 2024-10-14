@@ -25,6 +25,20 @@ const placeholders = [
   "Films exploring parallel universes or alternate realities, challenging our perception of existence"
 ]
 
+//default questions to initiate users in the film chat section
+const basicQuestions = [
+  "Who directed the film?",
+  "What is the main plot of the film?",
+  "Who are the main actors?",
+  "What is the genre of the film?",
+  "When was the film released?",
+  "What awards has the film won?",
+  "Is the film based on a true story?",
+  "What is the rating of the film?",
+  "Where was the film shot?"
+];
+
+
 const filmTranslations = [
   { language: 'English', word: 'Film' },
   { language: 'Mandarin Chinese', word: '电影' },
@@ -226,21 +240,28 @@ export default function FilmSearch() {
     // Add the user message to the chat history first
     setChatHistory((prev) => [...prev, newMessage]);
   
+    // Get the last 7 messages from chat history
+    const last7Chats = chatHistory.slice(-7);
+  
     // Temporarily store the message before clearing it from the input field
     const tempMessage = chatMessage;
   
     // Clear the input after submitting
     setChatMessage('');
-
+  
     // Set loading state to true when the request is sent
     setIsChatLoading(true);
   
     try {
-      // Call the API with the user's question
+      // Prepare the chat context with the last 7 exchanges
+      const chatContext = last7Chats.map((chat) => `${chat.sender}: ${chat.text}`).join("\n");
+  
+      // Call the API with the user's question and the last 7 exchanges
       const response = await axios.post(process.env.NEXT_PUBLIC_ANSWERQUERY_API, {
-        question: tempMessage, // Use the temporarily stored question
+        question: tempMessage,  // Use the temporarily stored question
         filmdetails: selectedFilm.b_details,
-        filmdata: selectedFilm.o_details
+        filmdata: selectedFilm.o_details,
+        context: chatContext  // Send the chat history as context
       });
   
       // Add the film's response to the chat history
@@ -257,11 +278,12 @@ export default function FilmSearch() {
     } finally {
       // Set loading state to false after the request completes
       setIsChatLoading(false);
-
+  
       // Ensure scrolling to the bottom of the chat
       scrollToBottom();
     }
   };
+  
     
   // Function to scroll to the bottom of the chat history
   const scrollToBottom = () => {
@@ -465,7 +487,7 @@ export default function FilmSearch() {
           onMouseDown={(e) => handleDrag(e)}
           ></div>
 
-        {/* Right Panel for Chat */}
+ {/* Right Panel for Chat */}
 <div className="bg-gray-700 text-white flex flex-col" style={{ width: `${100 - leftPanelWidth}%` }}>
   <div className="p-4 flex justify-end items-center">
     <button
@@ -476,42 +498,67 @@ export default function FilmSearch() {
     </button>
   </div>
 
+  {/* Render clickable question blobs */}
+{!isChatLoading && chatHistory.length === 0 && (  // Only show if no chat is ongoing
+  <div className="flex items-center justify-center h-full p-4">
+    <div className="flex flex-wrap gap-2 justify-center">
+      {basicQuestions.map((question, index) => (
+        <motion.button
+          key={index}
+          onClick={() => {
+            setChatMessage(question);
+            setTimeout(() => {
+              handleChatSubmit({ preventDefault: () => {} });
+            }, 200);
+          }}
+          className="bg-gray-800 text-white rounded-full px-4 py-2 text-sm hover:bg-gray-700 transition duration-300"
+          whileHover={{ scale: 1.1 }}
+        >
+          {question}
+        </motion.button>
+      ))}
+    </div>
+  </div>
+)}
+
+
   {/* Chat History Container */}
-<div id="chat-history" className="flex-grow overflow-y-auto p-4 max-h-[60vh]">
-  <div className="space-y-4">
-    {chatHistory.map((message, index) => (
-      <div
-        key={index}
-        className={`p-3 max-w-[80%] rounded-lg ${
-          message.sender === 'user'
-            ? 'self-end bg-white text-black ml-auto'  // User question: Right-aligned white blob
-            : 'self-start bg-black text-white mr-auto' // Film answer: Left-aligned black blob
-        }`}
-        style={{
-          borderRadius: '30px 20px 30px 30px', // Creates a fluid blob-like shape
-          padding: '15px',
-          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-          transition: 'all 0.5s ease-in-out',
-        }}
-      >
-        <p className="whitespace-pre-wrap">{message.text}</p>
-      </div>
-    ))}
+  <div id="chat-history" className="flex-grow overflow-y-auto p-4 max-h-[60vh]">
+    <div className="space-y-4">
+      {chatHistory.map((message, index) => (
+        <div
+          key={index}
+          className={`p-3 max-w-[80%] rounded-lg ${
+            message.sender === 'user'
+              ? 'self-end bg-white text-black ml-auto'  // User question: Right-aligned white blob
+              : 'self-start bg-black text-white mr-auto' // Film answer: Left-aligned black blob
+          }`}
+          style={{
+            borderRadius: '30px 20px 30px 30px',
+            padding: '15px',
+            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.5s ease-in-out',
+          }}
+        >
+          <p className="whitespace-pre-wrap">{message.text}</p>
+        </div>
+      ))}
+      
 
     {/* Show loading spinner while waiting for response */}
     {isChatLoading && (
-      <div className="flex justify-center items-center text-white">
-        <motion.div
-          className="flex justify-center items-center"
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1 }}
-        >
-          <Loader className="w-8 h-8 text-gray-500 animate-spin" />
-        </motion.div>
-      </div>
-    )}
+        <div className="flex justify-center items-center text-white">
+          <motion.div
+            className="flex justify-center items-center"
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1 }}
+          >
+            <Loader className="w-8 h-8 text-gray-500 animate-spin" />
+          </motion.div>
+        </div>
+      )}
+    </div>
   </div>
-</div>
 
 
 
