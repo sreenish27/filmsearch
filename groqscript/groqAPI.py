@@ -19,6 +19,32 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+# Utility function to split the input into batches based on token limit
+def split_into_batches(content: str, max_tokens: int) -> List[str]:
+    # We assume an average of 4 characters per token in most text.
+    # This is a very rough estimate; a tokenizer can be used for exact counts.
+    avg_token_size = 4
+    chunk_size = max_tokens * avg_token_size
+
+    # Split the content into roughly max_token-sized chunks
+    content_chunks = [content[i:i+chunk_size] for i in range(0, len(content), chunk_size)]
+    return content_chunks
+
+# Modify this function to process the content in batches
+async def process_in_batches(content: str, framework: Dict[str, Any], endpoint_logic):
+    max_tokens = 18500
+    content_batches = split_into_batches(content, max_tokens)
+
+    result = []
+    for batch in content_batches:
+        # Apply the specific endpoint logic to each batch
+        batch_result = await endpoint_logic(batch, framework)
+        result.append(batch_result)
+    
+    # Join the results of all batches into a single string or dict, as per your original format
+    return "".join(result)  # For string content, concatenate batches into a single string
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -57,6 +83,7 @@ async def read_root():
 
 @app.post("/extract")
 async def extract_data(request: ExtractRequest):
+    
     # Construct the prompt for the API
     prompt = (
         f"Extract only the most essential and relevant information. "
@@ -93,6 +120,10 @@ async def extract_data(request: ExtractRequest):
         # Log the exception for debugging
         logger.error("An error occurred", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+    
+    # Process the request in batches, and concatenate the result to keep it in the original form
+    extracted_data = await process_in_batches(request.content, request.framework, endpoint_logic)
+    return {extracted_data} 
 
 
 #an endpoint to process the vector embeddings
@@ -118,16 +149,19 @@ class ProcessInput(BaseModel):
 async def process_query(request: ProcessInput):
     # Construct the prompt for the API
     prompt = (
-f"Read the content and understand what is written\n"
-f"Now select the words that match the most with what is given in the content from the provided categorylist\n"
-f"DO NOT HALLUCINATE, pick words only from the list provided\n"
-f"You can pick a maximum of 3 and minimum of 1 word\n"
-f"Be conservative in your selection. Only choose additional categories if there is strong evidence in the user's query to justify their inclusion\n"
-f"This is done to boil down which is the most appropriate category to search in\n"
-f"THE OUTPUT MUST BE JUST 1 - 3 WORDS IN A LIST, NOTHING ELSE\n"
-f"Content:\n{request.content}\n\n"
-f"Category List:\n{request.categorylist}\n"
+    f"Carefully analyze the content and understand the core thematic focus or story elements.\n"
+    f"Select the most relevant categories from the provided category list that directly match the central theme or narrative described in the content.\n"
+    f"DO NOT HALLUCINATE. Pick only words from the provided list that directly align with the main subject matter.\n"
+    f"Specifically, avoid selecting categories like 'controversy' or 'popularity' unless they are explicitly mentioned or central to the query.\n"
+    f"Prioritize categories related to the story, themes, or genre. Ensure that your choices are based on strong evidence from the content.\n"
+    f"You can pick a maximum of 3 and a minimum of 1 word.\n"
+    f"Be conservative in your selection: only choose additional categories if there is clear and explicit evidence in the user's query to justify their inclusion.\n"
+    f"This process is intended to help narrow down the most appropriate category for search based on thematic relevance.\n"
+    f"THE OUTPUT MUST BE JUST 1 - 3 WORDS IN A LIST, NOTHING ELSE.\n"
+    f"Content:\n{request.content}\n\n"
+    f"Category List:\n{request.categorylist}\n"
 )
+
     # Continue with the API call using the constructed prompt
 
 
@@ -244,15 +278,19 @@ class unstructuredInfo(BaseModel):
 async def generate_sentence(request: unstructuredInfo):
     # Construct the prompt for the API
     prompt = (
-        f"Read the user input carefully and fully understand its intent.\n"
-        f"Extract all relevant descriptive or thematic information while ignoring names of people, specific companies, or entities unless directly central to the query.\n"
-        f"Expand the extracted information by adding detail that directly relates to the specific context of the query without introducing irrelevant or generalized content.\n"
-        f"For instance, if the query is 'films inspired by foreign films,' focus specifically on how certain films were influenced by foreign films, avoiding unrelated cultural or thematic elaboration.\n"
-        f"Ensure the expanded content stays fully aligned with the query’s focus.\n"
-        f"Construct a concise paragraph or a couple of sentences that clearly summarize and expand on the original query, without including unnecessary or tangential details.\n"
-        f"If there is nothing relevant to extract or expand upon, just return 'Noinfo' and nothing else.\n"
-        f"Content:\n{request.content}\n\n"
-    )
+    f"Carefully analyze the user input with a focus on extracting only thematic or descriptive information.\n"
+    f"IF THERE IS NOTHING TO EXTRACT, JUST DO NOT AND GIVE 'Noinfo, DO NOT OVERCOMPLICATE IT.\n"
+    f"Ignore all names of people, specific companies, or entities.\n"
+    f"Focus on the thematic elements, narrative style, genre influences, or film characteristics present in the query.\n"
+    f"Do not include or mention any names or entities, even if they appear in the query.\n"
+    f"Expand on the thematic or contextual information by adding detail that directly relates to the core idea of the query, without introducing irrelevant or generalized content.\n"
+    f"For example, if the query is 'films inspired by foreign films,' focus only on how certain films are influenced by foreign cinema, without mentioning specific filmmakers or titles.\n"
+    f"Ensure the expanded content stays fully aligned with the thematic focus of the query.\n"
+    f"Construct a concise paragraph or a couple of sentences that clearly summarize and expand on the thematic elements, without including unnecessary details or tangential information.\n"
+    f"If there is nothing relevant to extract or expand upon, return 'Noinfo' and nothing else.\n"
+    f"Content:\n{request.content}\n\n"
+)
+
     # Continue with the API call using the constructed prompt
 
 

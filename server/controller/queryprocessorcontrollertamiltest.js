@@ -10,94 +10,98 @@ const { json } = pkg;
 // Film categories configuration
 const film_categories = {
     "story": {
-        "plot": "Plot",
-        "synopsis": "General",
-        "premise": "General",
-        "summary": "General",
-        "storyline": "General",
-        "themes": "Themes",
-        "adaptation": "General",
-        "screenplay": "General"
+        "plot": "plot",
+        "synopsis": "synopsis",
+        "premise": "premise",
+        "storyline": "storyline",
+        "summary": "summary",
+        "screenplay": "screenplay",
+        "adaptation": "adaptation",
+        "adaptations": "adaptations"
     },
     "production": {
-        "production": "Production",
-        "development": "General",
-        "filming": "General",
-        "casting": "General",
-        "crew": "General",
-        "background": "General"
-    },
-    "cast": {
-        "cast": "Cast"
+        "production": "production",
+        "development": "development",
+        "background": "background",
+        "filming": "filming",
+        "delays": "delays",
+        "casting": "casting",
+        "crew": "crew"
     },
     "audio": {
-        "soundtrack": "Soundtrack",
-        "music": "Soundtrack",
-        "songs": "Songs",
-        "tracklist": "General"
+        "soundtrack": "soundtrack",
+        "soundtracks": "soundtracks",
+        "songs": "songs",
+        "tracklist": "tracklist"
     },
     "release": {
-        "release": "Release",
-        "distribution": "General",
-        "premiere": "General",
-        "rerelease": "General",
-        "availability": "General",
-        "certification": "General"
+        "release": "release",
+        "premiere": "premiere",
+        "rerelease": "rerelease",
+        "availability": "availability",
+        "certification": "certification",
+        "distribution": "distribution"
     },
     "marketing": {
-        "marketing": "Marketing",
-        "promotion": "General",
-        "trailer": "General",
-        "publicity": "General"
+        "marketing": "marketing",
+        "promotion": "promotion",
+        "trailer": "trailer",
+        "publicity": "publicity"
     },
     "reception": {
-        "reception": "Reception",
-        "reviews": "General",
-        "awards": "Awards",
-        "nominations": "General",
-        "boxoffice": "General",
-        "audience": "General",
-        "impact": "General",
-        "legacy": "Legacy"
+        "reception": "reception",
+        "reviews": "reviews",
+        "review": "review",
+        "audience": "audience"
+    },
+    "awards": {
+        "awards": "awards",
+        "nominations": "nominations",
+        "festivals": "festivals"
+    },
+    "boxoffice": {
+        "boxoffice": "boxoffice",
+        "economics": "economics",
+        "impact": "impact"
+    },
+    "legacy": {
+        "legacy": "legacy",
+        "reappraisal": "reappraisal",
+        "postrelease": "postrelease"
     },
     "sequels": {
-        "sequel": "Sequel",
-        "prequel": "General",
-        "remake": "Remake",
-        "spinoff": "General",
-        "adaptations": "General",
-        "installments": "General",
-        "anthologies": "General",
-        "miniseries": "General"
-    },
-    "trivia": {
-        "trivia": "Trivia",
-        "goofs": "General",
-        "influences": "General",
-        "inspiration": "General"
+        "sequel": "sequel",
+        "prequel": "prequel",
+        "remake": "remake",
+        "spinoff": "spinoff",
+        "installments": "installments",
+        "anthologies": "anthologies",
+        "miniseries": "miniseries"
     },
     "controversy": {
-        "controversies": "Controversies",
-        "lawsuit": "General",
-        "litigation": "General",
-        "allegations": "General",
-        "censorship": "General"
+        "controversies": "controversies",
+        "lawsuit": "lawsuit",
+        "litigation": "litigation",
+        "allegations": "allegations",
+        "censorship": "censorship"
     },
-    "postrelease": {
-        "reappraisal": "General",
-        "colourisation": "General",
-        "postrelease": "General"
+    "trivia": {
+        "trivia": "trivia",
+        "goofs": "goofs",
+        "inspirations": "inspirations",
+        "influences": "influences",
+        "legend": "legend"
     },
-    "miscellaneous": {
-        "title": "General",
-        "generalinfo": "General",
-        "other": "General",
-        "related": "General",
-        "sources": "General",
-        "footnotes": "General",
-        "future": "General"
+    "adaptation": {
+        "adaptations": "adaptations"
+    },
+    "festivals": {
+        "festivals": "festivals"
     }
-}
+};
+
+
+
 
 const categorylist = Object.keys(film_categories);
 
@@ -184,6 +188,8 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
     const sel_categories = jsonrepair(response.data[0]);
     const sel_categories_list = JSON.parse(sel_categories.replace(/'/g, '"'));
 
+    console.log(sel_categories_list)
+
     //as you are going to be using only one vector to check similarity between all columns
     const vec_response = await axios.post(encodeEndpoint, {
         sentence: unstructquery
@@ -203,7 +209,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
                 t_name: 'tamilfilminfo',
                 c_name: category_cols[j],
                 q_embedding: vec_response.data,
-                m_threshold: 0.27,
+                m_threshold: 0.15,
                 m_count: 1
             });
                 //pushing all the films into a single list
@@ -229,7 +235,7 @@ const vectorfilm_search = async (filmlist, unstructquery) => {
                     t_name: 'tamilfilminfo',
                     c_name: category_cols[j],
                     q_embedding: vec_response.data,
-                    m_threshold: 0.27,
+                    m_threshold: 0.15,
                     m_count: 1,
                     title_list: filmlist
                 });

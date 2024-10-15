@@ -363,14 +363,21 @@ export default function FilmSearch() {
           transition={{ duration: 0.5 }}
         >
           <div className="relative flex items-start">
-            <textarea
-              ref={textareaRef}
-              className="w-full bg-white bg-opacity-10 text-white text-xl rounded-2xl py-6 pl-8 pr-20 focus:outline-none focus:ring-2 focus:ring-white focus:bg-opacity-20 transition-all duration-300 resize-none overflow-hidden"
-              style={{ height: '180px' }}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={typedPlaceholder}
-            />
+          <textarea
+          ref={textareaRef}
+          className="w-full bg-white bg-opacity-10 text-white text-xl rounded-2xl py-6 pl-8 pr-20 focus:outline-none focus:ring-2 focus:ring-white focus:bg-opacity-20 transition-all duration-300 resize-none overflow-hidden"
+          style={{ height: '180px' }}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();  // Prevent the default behavior of "Enter" creating a new line
+            handleSearch(e);  // Trigger search when Enter is pressed
+          }
+        }}
+        placeholder={typedPlaceholder}
+      />
+
             <motion.button
               className="absolute right-3 top-3 bg-white text-black rounded-xl p-4 focus:outline-none hover:bg-slate-300 transition-colors duration-300"
               type="submit"
