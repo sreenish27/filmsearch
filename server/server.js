@@ -9,17 +9,29 @@ import { getlistoffilmobjects } from "./controller/pageresultscontroller.js";
 
 export const app = express();
 
+const allowedOrigins = [
+    'https://filmsearch-kappa.vercel.app',
+    'http://localhost:3000'
+];
+
 const corsOptions = {
-    origin: 'https://filmsearch-kappa.vercel.app/' || 'http://localhost:3000/',
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 
+
 app.use(cors(corsOptions));  // Correct way to use CORS with options
 
 // Ensure OPTIONS preflight requests are handled correctly
-app.options('*', cors(corsOptions));  // This line ensures CORS headers are sent in response to preflight requests
+app.options('*', cors(corsOptions)); // This line ensures CORS headers are sent in response to preflight requests
 
 app.use(express.json())
 
