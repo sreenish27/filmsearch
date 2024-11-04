@@ -10,7 +10,7 @@ import { getlistoffilmobjects } from "./controller/pageresultscontroller.js";
 export const app = express();
 
 const corsOptions = {
-    origin: clientUrl || 'http://localhost:3000/',
+    origin: 'https://filmsearch-kappa.vercel.app/' || 'http://localhost:3000/',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
