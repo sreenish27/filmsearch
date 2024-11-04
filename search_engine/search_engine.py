@@ -9,17 +9,15 @@ import math
 import re
 
 # BM25 Hyperparameters
-k1 = 1.5  # Term frequency saturation
-b = 0.75  # Length normalization factor
-initial_ratio_threshold = 0.5  # Base ratio threshold
-film_limit = 20  # Number of films considered "sufficient" for the threshold adjustment
+k1 = 1.5
+b = 0.75
+initial_ratio_threshold = 0.5
+film_limit = 20
 
 # Query processing function
 def queryprocessor(query):
     q_list = re.split(r'\W+', query.lower())
-    q_list = [word for word in q_list if word]
-    print(q_list)  # Print to see the split result
-    return q_list
+    return [word for word in q_list if word]
 
 # Function to compare 2 vectors and return similarity score
 def similarity_score(raw_vector1, raw_vector2):
@@ -30,9 +28,7 @@ def similarity_score(raw_vector1, raw_vector2):
 # Function to get avg_doc_length for a specific zone
 def get_avg_doc_length(zone_name):
     response = supabase.rpc('get_zone_avglength', {'zone_name': zone_name}).execute()
-    if response.data:
-        return float(response.data)
-    return 1.0
+    return float(response.data) if response.data else 1.0
 
 # Calculate BM25-based film scores with adaptive threshold
 def calculate_film_scores(word_zone_boosts, adaptive_ratio):
@@ -52,17 +48,16 @@ def calculate_film_scores(word_zone_boosts, adaptive_ratio):
             if not tfidf_values:
                 continue
 
-            tf_dict = tfidf_values['tf']
-            idf = tfidf_values['idf']
+            tf_dict = np.array(list(tfidf_values['tf'].items()))  # Convert tf_dict to numpy array
+            film_ids, tf_values = tf_dict[:, 0], tf_dict[:, 1].astype(float)
             avg_doc_length = get_avg_doc_length(zone_name)
+            tf_weighted = (tf_values * (k1 + 1)) / (tf_values + k1 * (1 - b + b * (len(tf_values) / avg_doc_length)))
+            bm25_scores = tf_weighted * tfidf_values['idf'] * boost_score
 
-            for film_id, tf in tf_dict.items():
-                tf_weighted = (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (len(tf_dict) / avg_doc_length)))
-                bm25_score = tf_weighted * idf
-                final_score = bm25_score * boost_score
-                cumulative_scores[film_id] += round(final_score, 6)
+            for idx, film_id in enumerate(film_ids):
+                cumulative_scores[film_id] += bm25_scores[idx]
 
-            word_film_ids.update(tf_dict.keys())
+            word_film_ids.update(film_ids)
         film_sets.append(word_film_ids)
 
     common_film_ids = set.intersection(*film_sets) if film_sets else set()
@@ -78,11 +73,7 @@ def calculate_film_scores(word_zone_boosts, adaptive_ratio):
 
 # Function to boost zone scores by similarity
 def zone_score_boosting(static_zone_score, zone_similarity_score, alpha=1.0):
-    boosted_scores = {}
-    for zone, static_score in static_zone_score.items():
-        similarity = zone_similarity_score.get(zone, 0)
-        boosted_scores[zone] = static_score * (1 + alpha * similarity)
-    return boosted_scores
+    return {zone: static_score * (1 + alpha * zone_similarity_score.get(zone, 0)) for zone, static_score in static_zone_score.items()}
 
 # Function to calculate cumulative IDF scores for query terms and dynamically filter
 def get_top_idf_terms(word_list, overall_zone_score_dict):
@@ -106,17 +97,11 @@ def get_top_idf_terms(word_list, overall_zone_score_dict):
     sorted_terms = sorted(term_idf_scores.items(), key=lambda item: item[1], reverse=True)
 
     # Determine the number of terms to keep (75% cutoff)
-    if len(sorted_terms) > 2:
-        top_count = max(1, int(len(sorted_terms) * 0.75))  # For longer queries, take top 75%
-    else:
-        top_count = len(sorted_terms)  # For shorter queries (<= 2 terms), keep all terms
+    top_count = max(1, int(len(sorted_terms) * 0.75)) if len(sorted_terms) > 2 else len(sorted_terms)
 
-    # Select the top terms based on calculated count
     top_terms = {term: overall_zone_score_dict[term] for term, _ in sorted_terms[:top_count]}
 
-    print("Selected words for film ID matching:", top_terms)
     return top_terms
-
 
 # Main search function with adaptive ratio and iterative filtering
 def get_search_results(word_list, query_vector):
@@ -126,9 +111,7 @@ def get_search_results(word_list, query_vector):
         zone_importance_response = supabase.rpc('get_zonei_score', params={'search_term': word}).execute()
         zone_importance_dict = zone_importance_response.data
         
-        # Check if zone_importance_dict is None
         if not zone_importance_dict:
-            print(f"Skipping word '{word}' due to missing zone importance data.")
             continue
 
         sorted_zone_importance = {
@@ -144,52 +127,32 @@ def get_search_results(word_list, query_vector):
                     zone_vector = ast.literal_eval(zone_vector_response.data)
                     zone_vector_dict[zone_name] = similarity_score(query_vector, zone_vector)
                 except (ValueError, SyntaxError):
-                    print(f"Skipping zone '{zone_name}' due to malformed vector data.")
                     continue
-            else:
-                print(f"Skipping zone '{zone_name}' due to missing vector data.")
-                continue
 
-        # Boost the zone scores
         boosted_scores = zone_score_boosting(sorted_zone_importance, zone_vector_dict)
         overall_zone_score_dict[word] = boosted_scores
 
     top_idf_zone_scores = get_top_idf_terms(word_list, overall_zone_score_dict)
-    # Start with an adaptive ratio threshold
     initial_filtered_scores = calculate_film_scores(top_idf_zone_scores, adaptive_ratio=initial_ratio_threshold)
 
-    # Adaptive threshold based on film count
     total_films_count = len(initial_filtered_scores)
     adaptive_threshold = min(max(film_limit / max(total_films_count, 1), 0.3), 1.0) * initial_ratio_threshold
 
-    # Refine results if not enough films are found
     if len(initial_filtered_scores) < film_limit:
         sorted_terms = sorted(top_idf_zone_scores.keys(), key=lambda word: sum(top_idf_zone_scores[word].values()))
-        sufficient_count = 5  # Set this lower limit to stop filtering early if this is met
+        sufficient_count = 5
         for i in range(len(sorted_terms) - 1):
             removed_term = sorted_terms[-1 - i]
             selected_terms = {term: top_idf_zone_scores[term] for term in sorted_terms[:-1 - i]}
             final_film_dict_withscores = calculate_film_scores(selected_terms, adaptive_ratio=adaptive_threshold)
-            current_film_count = len(final_film_dict_withscores)
-            
-            print(f"Removing term '{removed_term}' due to insufficient film count. Current film count: {current_film_count}")
-            
-            # Stop if we reach or exceed `sufficient_count` (e.g., 5 films)
-            if current_film_count >= sufficient_count:
+            if len(final_film_dict_withscores) >= sufficient_count:
                 break
     else:
         final_film_dict_withscores = initial_filtered_scores
 
-    final_film_list = list(final_film_dict_withscores.keys())
-    # film_titles = []
-    # for film_id in final_film_list:
-    #     title_response = supabase.rpc('get_film_title', params={'filmid': film_id}).execute()
-    #     film_titles.append(title_response.data)
+    return list(final_film_dict_withscores.keys())
 
-    return final_film_list
-
-#final search function
+# Final search function
 def search(user_query, user_query_vector):
     query_terms = queryprocessor(user_query)
-    film_list = get_search_results(query_terms, user_query_vector)
-    return film_list
+    return get_search_results(query_terms, user_query_vector)
