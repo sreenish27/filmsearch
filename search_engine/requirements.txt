@@ -2,6 +2,7 @@ uvicorn
 fastapi
 groq
 numpy
+supabase
 json_repair
 python-dotenv
 sentence-transformers
