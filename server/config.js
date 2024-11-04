@@ -20,6 +20,9 @@ export const encodeEndpoint = process.env.ENCODE_QUERY
 export const concreteinfoEndpoint = process.env.CONCRETEINFO_QUERY
 export const unstructuredinfoEndpoint = process.env.UNSTRUCTUREDINFO_QUERY
 
+//search engine fastapi endpoints
+export const searchapiEndpoint = process.env.SEARCH_ENDPOINT
+
 
 
 

@@ -1,81 +1,143 @@
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy.selector import Selector
+import re
 
-class filmCrawlingSpider(CrawlSpider):
+class FilmCrawlingSpider(CrawlSpider):
     name = "filmcrawleramerican"
     allowed_domains = ["wikipedia.org"]
-    start_urls = ["https://en.wikipedia.org/wiki/Lists_of_American_films"]
+    start_urls = ["https://en.wikipedia.org/wiki/List_of_Marathi_films"]
 
     rules = (
-        Rule(LinkExtractor(allow = r"wiki/List_of_American_films_of.*"), 
-             callback="film_year_list_parse"),
-             )
+        Rule(
+            LinkExtractor(allow=r"wiki/List_of_Marathi_films_of.*"),
+            callback="parse_film_year_list",
+            follow=True
+        ),
+    )
 
-    def film_year_list_parse(self, response):
-        film_list = response.css('table.wikitable tbody tr td i a::attr(href)').getall()
-        for film_url in film_list:
-            yield response.follow(film_url, self.film_parse)
+    def clean_text(self, text):
+        """
+        Cleans text by removing unwanted patterns, style content, and extra whitespace.
+        """
+        if not text:
+            return None
 
-    def film_parse(self, response):
-        #extracts the subheadings in the page as a list, this is will be used to iterate further so that nothing about the film/tv show is missed
-        page_contents = response.css('div#vector-toc .vector-toc-text span:not(.vector-toc-numb)::text').getall()
+        # Remove style content
+        style_pattern = r'<style.*?>.*?</style>'
+        text = re.sub(style_pattern, '', text, flags=re.DOTALL)
 
-        #list of contents I do not want
-        remove_contents = ['References', 'External links', 'Bibliography', 'Notes']
+        # Remove the plainlist pattern
+        plainlist_pattern = r'\.mw-parser-output \.plainlist.*?padding:0}'
+        text = re.sub(plainlist_pattern, '', text, flags=re.DOTALL)
 
-        page_contents = [content for content in page_contents if content not in remove_contents]
-        #a dictionary to store all the info about a film/tv show
-        film_info = {}
+        # Clean extra whitespace and newlines
+        text = ' '.join(text.split())
+        return text.strip() or None
 
-         #getting the info on the top of the page because some old films has only that
-        table_tag = response.css('table.infobox.vevent')
+    def normalize_field_name(self, field_name):
+        """
+        Normalizes field names to lowercase and replaces spaces with underscores.
+        """
+        if field_name:
+            return '_'.join(field_name.lower().split())
+        return None
 
-       #get the info from the infobox and put it in appropriate fashion
-        rows = table_tag.css('tbody tr')[1:].getall()
+    def parse_film_year_list(self, response):
+        """
+        Parses the yearly film list pages and extracts links to individual films.
+        """
+        film_rows = response.xpath('//table[contains(@class, "wikitable")]//tbody//tr//td//i/a')
 
-        i = 1
+        for film_link in film_rows:
+            href = film_link.xpath('./@href').get()
+            link_title = film_link.xpath('./text()').get()
 
-        while(i < len(rows) + 1):
-            film_info[' '.join((table_tag.css('tbody tr')[i]).css('th.infobox-label ::text').getall()).strip()] = ' '.join((table_tag.css('tbody tr')[i]).css('td ::text').getall()).strip()
-            i = i + 1
+            if href and href.startswith('/wiki/'):
+                full_url = f"https://en.wikipedia.org{href}"
+                yield response.follow(
+                    url=full_url,
+                    callback=self.parse_film_page,
+                    meta={'link_title': link_title}
+                )
 
-        if table_tag:
-            following_tags = table_tag.xpath('following::*')
-            #list for all the content
-            top_textcontent = []
-            for tag in following_tags:
-                if tag.root.tag == 'div.mw-heading.mw-heading2':
-                    break
-                if tag.root.tag in ['p']:
-                    top_textcontent.extend(tag.css('*::text').getall())
-            film_info['generalinfo'] = ' '.join(top_textcontent).strip()
+    def parse_film_page(self, response):
+        """
+        Parses individual film pages to extract title, infobox data, and additional sections.
+        """
+        # Extract title from infobox or fallback options
+        title = (
+            response.xpath('//table[contains(@class, "infobox")]//tbody//tr/th[contains(@class, "infobox-above")]/text()').get()
+            or response.xpath('//h1[@id="firstHeading"]//text()').get()
+            or response.meta.get('link_title')
+        )
+        title = self.clean_text(title)
 
-        #loop through the page_contents list to extract all the info
-        for content in page_contents:
-            # Select the <h2> element with the specific id
-            h2_element = response.xpath(f'//h2[@id="{content}"]')
-            
-            if h2_element:
-                # Select all elements following the <h2> element
-                following_elements = h2_element.xpath('following::*')
-                
-                # Initialize a list to collect text content
-                text_content = []
-                
-                # Iterate over following elements and collect text until the next <h2>
-                for element in following_elements:
-                    # Break the loop if the element is an <h2>
-                    if element.root.tag == 'h2':
+        # Initialize film data with the title
+        film_data = {'title': title}
+
+        # Check if the infobox exists
+        infobox_exists = response.xpath('//table[contains(@class, "infobox")]').get()
+
+        if infobox_exists:
+            # Extract key-value pairs from the infobox
+            infobox_rows = response.xpath('//table[contains(@class, "infobox")]//tbody//tr')
+            for row in infobox_rows:
+                label = row.xpath('.//th[contains(@class, "infobox-label")]/text()').get()
+                if label:
+                    normalized_label = self.normalize_field_name(self.clean_text(label))
+                    value = row.xpath('.//td[contains(@class, "infobox-data")]//text()[not(ancestor::style)]').getall()
+                    cleaned_value = self.clean_text(' '.join(value))
+                    if cleaned_value:
+                        film_data[normalized_label] = cleaned_value
+
+            # Extract <p> tags after the infobox until the first section heading
+            intro_paragraphs = response.xpath('//table[contains(@class, "infobox")]/following-sibling::p')
+        else:
+            # If no infobox, extract <p> tags from the top of the page
+            intro_paragraphs = response.xpath('//p')
+
+        # Collect introduction content from the relevant <p> tags
+        current_content = []
+        for p in intro_paragraphs:
+            paragraph = p.xpath('.//text()[not(ancestor::style)]').getall()
+            if paragraph:
+                cleaned_paragraph = self.clean_text(' '.join(paragraph))
+                if cleaned_paragraph:
+                    current_content.append(cleaned_paragraph)
+
+        # Store collected <p> content under 'generalinfo'
+        if current_content:
+            film_data['generalinfo'] = ' '.join(current_content)
+
+        # Extract sections and their content
+        sections = response.xpath('//div[contains(@class, "mw-heading") and contains(@class, "mw-heading2")]')
+
+        for section in sections:
+            # Extract the heading name
+            heading = section.xpath('./h2//text()').get()
+            heading = self.clean_text(heading)
+            normalized_heading = self.normalize_field_name(heading)
+
+            # Skip unwanted sections
+            if normalized_heading and normalized_heading not in {"references", "further_reading", "external_links", "bibliography"}:
+                section_content = []
+                next_siblings = section.xpath('following-sibling::*')
+
+                for sibling in next_siblings:
+                    # Stop when we encounter another section heading
+                    if sibling.xpath('self::div[contains(@class, "mw-heading") and contains(@class, "mw-heading2")]'):
                         break
-                    # Collect text from the element
-                    if element.root.tag in ['p', 'h3', 'ul', 'table']:
-                        text_content.extend(element.css('*::text').getall())
-                
-                        # Join the text content and store it in the dictionary
-                        film_info[content] = ' '.join(text_content).strip()
-               
-        yield{
-            response.css('table.infobox.vevent tbody tr th.infobox-above.summary::text').get() : film_info
-            }
-    
 
+                    # Collect content from relevant tags like <p> and <ul>
+                    content = sibling.xpath('.//text()[not(ancestor::style)]').getall()
+                    if content:
+                        cleaned_content = self.clean_text(' '.join(content))
+                        if cleaned_content:
+                            section_content.append(cleaned_content)
+
+                if section_content:
+                    film_data[normalized_heading] = ' '.join(section_content)
+
+        # Yield the final film data
+        yield film_data

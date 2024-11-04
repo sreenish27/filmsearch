@@ -2,15 +2,10 @@ import express from "express";
 import session from "express-session";
 import { port, supabaseUrl, supabaseKey, clientUrl, sessionSecret } from "./config.js";
 import { createClient } from "@supabase/supabase-js";
-import { writeFilmsToDatabase } from "./controller/filmscontroller.js";
-import { writeFilmDetailsToDatabase } from "./controller/filminfocontroller.js";
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import readline from 'readline';
-import { processquery } from "./controller/queryprocessorcontrollertamiltest.js";
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import { searchengine } from "./controller/searchcontroller.js";
+import { getlistoffilmobjects } from "./controller/pageresultscontroller.js";
 
 export const app = express();
 
@@ -59,115 +54,48 @@ app.listen(port, () => {
     console.log(`We are live on port: ${port}`)
 })
 
-//loading the jsonl file which contains the film data in the format we want to store it in the database
-const loadFilms = async (filePath) => {
-    const fileStream = fs.createReadStream(filePath);
-    const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity
-    });
-
-    const filmData = [];
-    for await (const line of rl) {
-        filmData.push(JSON.parse(line));
-    }
-
-    return filmData;
-}
-
-//creating a frameworks dictionary
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const frameworksDir = path.join(__dirname, '../frameworks');
-const frameworks = {};
-
-fs.readdirSync(frameworksDir).forEach(file => {
-  if (path.extname(file) === '.json') {
-    const frameworkName = path.parse(file).name;
-    frameworks[frameworkName] = JSON.parse(fs.readFileSync(path.join(frameworksDir, file), 'utf8'));
-  }
-});
-
-export const frameworks_dict = frameworks;
-
-export const frameworks_list = Object.keys(frameworks_dict);
-
-// export const filmData = await loadFilms('../filmdata/americanfilms1.jsonl');
-
-// //looping through all the films in the array and writing them to the database
-// for (let i=0; i<filmData.length; i++) {
-//     await writeFilmsToDatabase(filmData[i]);
-//     await writeFilmDetailsToDatabase(filmData[i]);
-// }
-
-// const test = await processquery('films that talk about tamil nadu politics');
-
-// export const filmsearch_list = test
-
-//insert images code
-
-// // Read the JSON file
-// const jsonData = fs.readFileSync('poster_urls.jsonl', 'utf8');
-// const lines = jsonData.split('\n');
-
-// // Iterate through the lines and update the tamilfilms table
-// async function updatePosterUrls() {
-//   for (const line of lines) {
-//     try {
-//       const poster = JSON.parse(line);
-//       const { filmname, poster_url } = poster;
-
-//       if (poster_url && poster_url.includes('.jpg')) {
-//         // Update the tamilfilms table with the poster URL
-//         const { data, error } = await supabase
-//           .from('tamilfilms')
-//           .update({ image: poster_url })
-//           .eq('title', filmname);
-
-//         if (error) {
-//           console.error(`Error updating poster URL for ${filmname}:`, error);
-//         } else {
-//           console.log(`Poster URL updated for ${filmname}`);
-//         }
-//       } else {
-//         console.log(`Skipping update for ${filmname} - poster URL does not contain ".jpg"`);
-//       }
-//     } catch (error) {
-//       console.error('Error parsing JSON:', error);
-//       console.log('Skipping invalid entry');
-//     }
-//   }
-// }
-
-// // Run the update function
-// updatePosterUrls()
-//   .then(() => {
-//     console.log('Poster URL update completed');
-//   })
-//   .catch((error) => {
-//     console.error('Error updating poster URLs:', error);
-//   });
-
-
 //an endpoint to catch the query from the client side and give the list of films back, handled appropriately for multiple sessions
 app.post('/api/userquery', async (req, res) => {
     req.setTimeout(300000); // 5 minutes
-    try{
-        //get the user query
-        req.session.query = req.body;
-        const {query} = req.session.query
-        console.log(query)
-        //now process the query and get the list of films
-        req.session.film_list = await processquery(query);
-        //now send the film list back to the user
-        res.send(req.session.film_list);
-    } catch(err) {
+    try {
+        let filmList;
+        let noofpages;
+
+        // Perform the initial search
+        const { query } = req.body;
+        console.log(`User query: ${query}`);
+        const searchResult = await searchengine(query);
+        req.session.film_list = searchResult;
+        const filmobjects = searchResult.filmobject
+        filmList = await getlistoffilmobjects(searchResult.filmobject, 1); // Get film objects for the first page
+        noofpages = searchResult.noofpages;
+
+        // Send both film list and the number of pages to the frontend
+        res.json({ filmList, noofpages,  filmobjects});
+    } catch (err) {
         console.error(err);
-        res.status(500).json({error:"an error occured while processing your request."});
-    }   
+        res.status(500).json({ error: "An error occurred while processing your request." });
+    }
 });
 
+//an endpoint which will take the page number and the filmobjectidlist and return a list of filmobjects for that page
+app.post('/api/pagequery', async (req, res) => {
+    req.setTimeout(300000); // 5 minutes
+    try {
+        let filmList;
+
+        // Retrieve film objects for the requested page number
+        const pageNumber = req.body.pageNumber
+        const filmobjectlist = req.body.filmobjectlist
+        filmList = await getlistoffilmobjects(filmobjectlist, pageNumber);
+        // Send both film list and the number of pages to the frontend
+        res.json({ filmList });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "An error occurred while processing your request." });
+    }
+});
+
+
+
 export default app;
-
-
