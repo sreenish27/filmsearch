@@ -30,8 +30,8 @@ def get_avg_doc_length(zone_name):
     response = supabase.rpc('get_zone_avglength', {'zone_name': zone_name}).execute()
     return float(response.data) if response.data else 1.0
 
-# Calculate BM25-based film scores with adaptive threshold
-def calculate_film_scores(word_zone_boosts, adaptive_ratio):
+# Calculate BM25-based film scores with static threshold
+def calculate_film_scores(word_zone_boosts):
     cumulative_scores = defaultdict(float)
     film_sets = []
 
@@ -60,12 +60,14 @@ def calculate_film_scores(word_zone_boosts, adaptive_ratio):
             word_film_ids.update(film_ids)
         film_sets.append(word_film_ids)
 
+    # Only include films common across all words
     common_film_ids = set.intersection(*film_sets) if film_sets else set()
     filtered_scores = {film_id: score for film_id, score in cumulative_scores.items() if film_id in common_film_ids}
 
+    # Normalize scores by the max score and apply the initial ratio threshold
     if filtered_scores:
         max_score = max(filtered_scores.values())
-        final_scores = {film_id: score for film_id, score in filtered_scores.items() if (score / max_score) >= adaptive_ratio}
+        final_scores = {film_id: score for film_id, score in filtered_scores.items() if (score / max_score) >= initial_ratio_threshold}
     else:
         final_scores = {}
 
@@ -75,7 +77,7 @@ def calculate_film_scores(word_zone_boosts, adaptive_ratio):
 def zone_score_boosting(static_zone_score, zone_similarity_score, alpha=1.0):
     return {zone: static_score * (1 + alpha * zone_similarity_score.get(zone, 0)) for zone, static_score in static_zone_score.items()}
 
-# Function to calculate cumulative IDF scores for query terms and dynamically filter
+# Function to calculate cumulative IDF scores for query terms and filter top terms
 def get_top_idf_terms(word_list, overall_zone_score_dict):
     term_idf_scores = {}
 
@@ -93,20 +95,19 @@ def get_top_idf_terms(word_list, overall_zone_score_dict):
 
         term_idf_scores[word] = cumulative_idf
 
-    # Sort terms by cumulative IDF scores (descending)
+    # Sort terms by cumulative IDF scores (descending) and keep the top 75%
     sorted_terms = sorted(term_idf_scores.items(), key=lambda item: item[1], reverse=True)
-
-    # Determine the number of terms to keep (75% cutoff)
     top_count = max(1, int(len(sorted_terms) * 0.75)) if len(sorted_terms) > 2 else len(sorted_terms)
 
     top_terms = {term: overall_zone_score_dict[term] for term, _ in sorted_terms[:top_count]}
 
     return top_terms
 
-# Main search function with adaptive ratio and iterative filtering
+# Main search function with static filtering
 def get_search_results(word_list, query_vector):
     overall_zone_score_dict = {}
 
+    # Get zone importance and similarity scores for each word in the query
     for word in word_list:
         zone_importance_response = supabase.rpc('get_zonei_score', params={'search_term': word}).execute()
         zone_importance_dict = zone_importance_response.data
@@ -118,6 +119,7 @@ def get_search_results(word_list, query_vector):
             k: v for k, v in sorted(zone_importance_dict.items(), key=lambda item: item[1], reverse=True) if v != 0
         }
 
+        # Calculate similarity scores for each zone
         zone_vector_dict = {}
         for zone_name in sorted_zone_importance:
             zone_vector_response = supabase.rpc('get_zone_vector', params={'zone_name': zone_name}).execute()
@@ -129,27 +131,15 @@ def get_search_results(word_list, query_vector):
                 except (ValueError, SyntaxError):
                     continue
 
+        # Boost scores based on similarity
         boosted_scores = zone_score_boosting(sorted_zone_importance, zone_vector_dict)
         overall_zone_score_dict[word] = boosted_scores
 
+    # Select top IDF terms
     top_idf_zone_scores = get_top_idf_terms(word_list, overall_zone_score_dict)
-    initial_filtered_scores = calculate_film_scores(top_idf_zone_scores, adaptive_ratio=initial_ratio_threshold)
 
-    total_films_count = len(initial_filtered_scores)
-    adaptive_threshold = min(max(film_limit / max(total_films_count, 1), 0.3), 1.0) * initial_ratio_threshold
-
-    if len(initial_filtered_scores) < film_limit:
-        sorted_terms = sorted(top_idf_zone_scores.keys(), key=lambda word: sum(top_idf_zone_scores[word].values()))
-        sufficient_count = 5
-        for i in range(len(sorted_terms) - 1):
-            removed_term = sorted_terms[-1 - i]
-            selected_terms = {term: top_idf_zone_scores[term] for term in sorted_terms[:-1 - i]}
-            final_film_dict_withscores = calculate_film_scores(selected_terms, adaptive_ratio=adaptive_threshold)
-            if len(final_film_dict_withscores) >= sufficient_count:
-                break
-    else:
-        final_film_dict_withscores = initial_filtered_scores
-
+    # Calculate scores based on selected terms and return the top results
+    final_film_dict_withscores = calculate_film_scores(top_idf_zone_scores)
     return list(final_film_dict_withscores.keys())
 
 # Final search function
