@@ -13,11 +13,25 @@ k1 = 1.5
 b = 0.75
 initial_ratio_threshold = 0.5
 film_limit = 20
+long_query_threshold = 7  # Threshold for very long queries
+
+# Function to determine drop percentage based on query length
+def get_dynamic_drop_percentage(query_length):
+    if 7 <= query_length <= 8:
+        return 0.6  # Drop 60% of words
+    elif 9 <= query_length <= 10:
+        return 0.75  # Drop 75% of words
+    elif query_length > 10:
+        return 0.85  # Drop 85% of words
+    else:
+        return 0.0  # No drop for shorter queries
 
 # Query processing function
 def queryprocessor(query):
     q_list = re.split(r'\W+', query.lower())
-    return [word for word in q_list if word]
+    tokenized_words = [word for word in q_list if word]
+    print("Tokenized Words:", tokenized_words)
+    return tokenized_words
 
 # Function to compare 2 vectors and return similarity score
 def similarity_score(raw_vector1, raw_vector2):
@@ -30,8 +44,8 @@ def get_avg_doc_length(zone_name):
     response = supabase.rpc('get_zone_avglength', {'zone_name': zone_name}).execute()
     return float(response.data) if response.data else 1.0
 
-# Calculate BM25-based film scores with static threshold
-def calculate_film_scores(word_zone_boosts):
+# Calculate BM25-based film scores with adaptive threshold
+def calculate_film_scores(word_zone_boosts, adaptive_ratio):
     cumulative_scores = defaultdict(float)
     film_sets = []
 
@@ -60,14 +74,12 @@ def calculate_film_scores(word_zone_boosts):
             word_film_ids.update(film_ids)
         film_sets.append(word_film_ids)
 
-    # Only include films common across all words
     common_film_ids = set.intersection(*film_sets) if film_sets else set()
     filtered_scores = {film_id: score for film_id, score in cumulative_scores.items() if film_id in common_film_ids}
 
-    # Normalize scores by the max score and apply the initial ratio threshold
     if filtered_scores:
         max_score = max(filtered_scores.values())
-        final_scores = {film_id: score for film_id, score in filtered_scores.items() if (score / max_score) >= initial_ratio_threshold}
+        final_scores = {film_id: score for film_id, score in filtered_scores.items() if (score / max_score) >= adaptive_ratio}
     else:
         final_scores = {}
 
@@ -103,8 +115,27 @@ def get_top_idf_terms(word_list, overall_zone_score_dict):
 
     return top_terms
 
-# Main search function with static filtering
-def get_search_results(word_list, query_vector):
+# Function to reduce query size for long queries by dropping low-IDF terms
+def reduce_query_terms(word_list, overall_zone_score_dict):
+    # Determine drop percentage based on query length
+    drop_percentage = get_dynamic_drop_percentage(len(word_list))
+    if drop_percentage == 0:
+        return word_list  # No reduction needed for shorter queries
+
+    # Calculate cumulative IDF scores
+    term_idf_scores = {word: sum(overall_zone_score_dict[word].values()) for word in word_list}
+    
+    # Sort words by cumulative IDF (ascending) and drop the lowest percentage
+    sorted_terms = sorted(term_idf_scores.items(), key=lambda x: x[1])
+    drop_count = int(len(sorted_terms) * drop_percentage)
+    
+    # Keep only the highest scoring terms
+    reduced_word_list = [term for term, _ in sorted_terms[drop_count:]]
+    print("Reduced query terms for long query:", reduced_word_list)
+    return reduced_word_list
+
+# Main search function with adaptive ratio and iterative filtering
+def get_search_results(word_list, query_vector, apply_adaptive_filtering):
     overall_zone_score_dict = {}
 
     # Get zone importance and similarity scores for each word in the query
@@ -135,14 +166,20 @@ def get_search_results(word_list, query_vector):
         boosted_scores = zone_score_boosting(sorted_zone_importance, zone_vector_dict)
         overall_zone_score_dict[word] = boosted_scores
 
+    # Apply adaptive filtering for long queries
+    if apply_adaptive_filtering:
+        word_list = reduce_query_terms(word_list, overall_zone_score_dict)
+    
     # Select top IDF terms
     top_idf_zone_scores = get_top_idf_terms(word_list, overall_zone_score_dict)
-
+    adaptive_ratio = initial_ratio_threshold if not apply_adaptive_filtering else 0.3
+    
     # Calculate scores based on selected terms and return the top results
-    final_film_dict_withscores = calculate_film_scores(top_idf_zone_scores)
+    final_film_dict_withscores = calculate_film_scores(top_idf_zone_scores, adaptive_ratio=adaptive_ratio)
     return list(final_film_dict_withscores.keys())
 
 # Final search function
 def search(user_query, user_query_vector):
     query_terms = queryprocessor(user_query)
-    return get_search_results(query_terms, user_query_vector)
+    apply_adaptive_filtering = len(query_terms) >= long_query_threshold  # Apply adaptive filtering only for very long queries
+    return get_search_results(query_terms, user_query_vector, apply_adaptive_filtering)
