@@ -77,20 +77,18 @@ def get_search_results(word_list, query_vector):
     # Step 1: Dynamically determine all unique relevant zones
     unique_zones = get_unique_zones(word_list)
 
-    # Step 2: Get zone importance scores for each word, calculate composite alignment, and retrieve top 3 zones per word
-    word_top_zones_dict = {}  # Store each word's top zones based on query vector alignment
+    # Step 2: Get zone importance scores for each word and retrieve all relevant zones per word
+    word_top_zones_dict = {}  # Store each word's relevant zones
     for word in word_list:
         zone_importance_response = supabase.rpc('get_zonei_score', params={'search_term': word}).execute()
         zone_importance_dict = zone_importance_response.data
         if not zone_importance_dict:
             print(f"No zone importance data for '{word}'")
             continue
-        # Retrieve the unique zones relevant to this word
+        # Retrieve all relevant zones for this word
         word_zones = {zone for zone, score in zone_importance_dict.items() if score > 0}
-        
-        # Get the top 3 relevant zones for this word based on query alignment
-        top_zones_for_word = get_top_zones_for_word(query_vector, word_zones)
-        word_top_zones_dict[word] = top_zones_for_word
+        word_top_zones_dict[word] = word_zones  # Keep all relevant zones for each word
+        print(f"All relevant zones for word '{word}': {word_zones}")
 
     # **Final Retrieval: Gather Film IDs using each word's top 3 zones**
     attempt = 1
