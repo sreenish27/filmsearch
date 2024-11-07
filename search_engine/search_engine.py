@@ -70,44 +70,54 @@ def get_top_zones_for_word(query_vector, zones):
 
 # Main search function to retrieve relevant film IDs based on selected words and zones
 def get_search_results(word_list, query_vector):
-    overall_zone_score_dict = {}
     print("\n--- Starting Search ---")
     print(f"Tokenized Query Terms: {word_list}\n")
 
     # Step 1: Dynamically determine all unique relevant zones
     unique_zones = get_unique_zones(word_list)
 
-    # Step 2: Get zone importance scores for each word and retrieve all relevant zones per word
-    word_top_zones_dict = {}  # Store each word's relevant zones
+    # Step 2: Calculate composite scores for each word
+    word_composite_scores = {}
+    word_top_zones_dict = {}  # Store relevant zones for words with non-zero composite scores
     for word in word_list:
         zone_importance_response = supabase.rpc('get_zonei_score', params={'search_term': word}).execute()
         zone_importance_dict = zone_importance_response.data
         if not zone_importance_dict:
             print(f"No zone importance data for '{word}'")
             continue
-        # Retrieve all relevant zones for this word
-        word_zones = {zone for zone, score in zone_importance_dict.items() if score > 0}
-        word_top_zones_dict[word] = word_zones  # Keep all relevant zones for each word
-        print(f"All relevant zones for word '{word}': {word_zones}")
 
-    # **Final Retrieval: Gather Film IDs using each word's top 3 zones**
+        # Calculate composite score across all relevant zones
+        composite_score = sum(score for zone, score in zone_importance_dict.items() if score > 0)
+        word_composite_scores[word] = composite_score
+        print(f"Composite score for word '{word}': {composite_score}")
+
+        # Only keep words with non-zero composite scores
+        if composite_score > 0:
+            word_zones = {zone for zone, score in zone_importance_dict.items() if score > 0}
+            word_top_zones_dict[word] = word_zones  # Store relevant zones for each word
+            print(f"All relevant zones for word '{word}': {word_zones}")
+
+    # Step 3: Filter out words with zero composite scores
+    filtered_words = [word for word in word_composite_scores if word_composite_scores[word] > 0]
+    print(f"Filtered words with non-zero composite scores: {filtered_words}")
+
+    # **Final Retrieval: Gather Film IDs using each word's relevant zones**
     attempt = 1
-    filtered_words = list(word_top_zones_dict.keys())
     while len(filtered_words) > 1:
         print(f"\nAttempt #{attempt} with words: {filtered_words}")
         attempt += 1
 
-        # Use all top zones of each selected word to find the film IDs directly
+        # Use all relevant zones of each selected word to find the film IDs directly
         film_sets = []
         for word in filtered_words:
             word_film_ids = set()
-            for zone in word_top_zones_dict[word]:  # Each word's individual top zones
+            for zone in word_top_zones_dict[word]:  # Each word's individual relevant zones
                 tfidf_response = supabase.rpc('get_tf_idf', params={'t_name': zone, 'search_term': word}).execute()
                 tfidf_data = tfidf_response.data
                 if tfidf_data and 'tf' in tfidf_data:
                     word_film_ids.update(tfidf_data['tf'].keys())
             film_sets.append(word_film_ids)
-            print(f"Film IDs for word '{word}' in its top zones: {word_film_ids}")
+            # print(f"Film IDs for word '{word}' in its relevant zones: {word_film_ids}")
 
         # Find common film IDs and rank by frequency of occurrence across zones
         common_film_ids = set.intersection(*film_sets) if film_sets else set()
@@ -116,9 +126,10 @@ def get_search_results(word_list, query_vector):
             print("\nSearch successful, results found.")
             return ranked_films
 
-        # If no results, remove two lowest-scoring words and try again
-        filtered_words = filtered_words[:-1]
-        print("Dropping two lowest-scoring words, remaining words:", filtered_words)
+        # If no results, remove the lowest-scoring word and try again
+        lowest_score_word = min(filtered_words, key=lambda w: word_composite_scores[w])
+        filtered_words.remove(lowest_score_word)
+        print(f"Dropping lowest-scoring word '{lowest_score_word}', remaining words: {filtered_words}")
 
     print("No results found after all attempts.")
     return []
