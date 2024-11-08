@@ -20,8 +20,11 @@ export const encodeEndpoint = process.env.ENCODE_QUERY
 export const concreteinfoEndpoint = process.env.CONCRETEINFO_QUERY
 export const unstructuredinfoEndpoint = process.env.UNSTRUCTUREDINFO_QUERY
 
-//search engine fastapi endpoints
+//search engine fastapi endpoint
 export const searchapiEndpoint = process.env.SEARCH_ENDPOINT
+
+//film chat fastapi endpoint
+export const filmchatEndpoint = process.env.FILMCHAT_ENDPOINT
 
 
 
