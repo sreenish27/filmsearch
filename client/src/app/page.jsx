@@ -196,34 +196,47 @@ export default function FilmSearch() {
 
   // Chat handler
   const handleChat = async (e) => {
-    e.preventDefault()
-    if (!chatState.message.trim()) return
+    e.preventDefault();
+    if (!chatState.message.trim()) return;
     
-    const newMessage = { sender: 'user', text: chatState.message }
+    const newMessage = { sender: 'user', text: chatState.message };
     setChatState(prev => ({
-      ...prev,
-      history: [...prev.history, newMessage],
-      message: '',
-      isTyping: true
-    }))
+        ...prev,
+        history: [...prev.history, newMessage],
+        message: '',
+        isTyping: true
+    }));
 
     try {
-      const response = await axios.post(process.env.NEXT_PUBLIC_ANSWERQUERY_API, {
-        question: chatState.message,
-        filmdetails: chatState.selectedFilm.film_details,
-        context: chatState.history.slice(-7).map(chat => `${chat.sender}: ${chat.text}`).join("\n")
-      })
+        // Step 1: Filter the film details for the question
+        const filterResponse = await axios.post(process.env.NEXT_PUBLIC_FILMCHAT_API, {
+            filmobject: chatState.selectedFilm.film_details,
+            question: chatState.message
+        });
 
-      typewriterEffect(response.data)
+        console.log(filterResponse)
+
+        const filteredFilmDetails = filterResponse.data; // Get the filtered film details from the response
+
+        // Step 2: Send the question and filtered film details to the FastAPI answer query endpoint
+        const answerResponse = await axios.post(process.env.NEXT_PUBLIC_ANSWERQUERY_API, {
+            question: chatState.message,
+            filmdetails: filteredFilmDetails,
+            context: chatState.history.slice(-7).map(chat => `${chat.sender}: ${chat.text}`).join("\n")
+        });
+
+        // Step 3: Display the answer in the chat
+        typewriterEffect(answerResponse.data);
     } catch (error) {
-      console.error(error)
-      setChatState(prev => ({
-        ...prev,
-        history: [...prev.history, { sender: 'film', text: 'Error occurred. Please try again.' }],
-        isTyping: false
-      }))
+        console.log(error)
+        setChatState(prev => ({
+            ...prev,
+            history: [...prev.history, { sender: 'film', text: 'Error occurred. Please try again.' }],
+            isTyping: false
+        }));
     }
-  }
+};
+
 
   const typewriterEffect = (text, delay = 50) => {
     let currentIndex = 0
@@ -362,26 +375,46 @@ export default function FilmSearch() {
             </div>
 
             {/* Pagination */}
-            {searchState.results.length > 0 && (
-              <div className="flex justify-center gap-2 mt-8">
-                {Array.from({ length: searchState.totalPages })
-                  .map((_, index) => index + 1)
-                  .map((page) => (
-                 <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 rounded ${
-                  searchState.currentPage === page 
-                   ? 'bg-white text-black' 
-                    : 'bg-gray-800 text-white hover:bg-gray-700'
-                   }`}
-                 >
-              {page}
-             </button>
-               ))}
 
-              </div>
-            )}
+            {searchState.results.length > 0 && (
+            <div className="flex justify-center gap-2 mt-8">
+            {/* Left arrow */}
+            <button
+              onClick={() => handlePageChange(searchState.currentPage - 1)}
+              className={`px-3 py-1 rounded ${searchState.currentPage > 1 ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-500 text-gray-300 cursor-not-allowed'}`}
+              disabled={searchState.currentPage <= 1}
+            >
+            &lt;
+            </button>
+
+            {/* Page numbers */}
+            {Array.from({ length: Math.min(12, searchState.totalPages) })
+            .map((_, index) => index + 1 + Math.max(0, searchState.currentPage - 6))
+            .map((page) => (
+              <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1 rounded ${
+                searchState.currentPage === page 
+                  ? 'bg-white text-black' 
+                  : 'bg-gray-800 text-white hover:bg-gray-700'
+                }`}
+                >
+              {page}
+              </button>
+                ))}
+
+              {/* Right arrow */}
+            <button
+            onClick={() => handlePageChange(searchState.currentPage + 1)}
+            className={`px-3 py-1 rounded ${searchState.currentPage < searchState.totalPages ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-500 text-gray-300 cursor-not-allowed'}`}
+            disabled={searchState.currentPage >= searchState.totalPages}
+            >
+              &gt;
+            </button>
+            </div>
+              )}
+
           </motion.div>
         )}
       </AnimatePresence>
