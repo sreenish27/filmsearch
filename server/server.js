@@ -6,6 +6,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { searchengine } from "./controller/searchcontroller.js";
 import { getlistoffilmobjects } from "./controller/pageresultscontroller.js";
+import { filmchatengine } from "./controller/filmchatcontroller.js";
 
 export const app = express();
 
@@ -102,6 +103,24 @@ app.post('/api/pagequery', async (req, res) => {
         filmList = await getlistoffilmobjects(filmobjectlist, pageNumber);
         // Send both film list and the number of pages to the frontend
         res.json({ filmList });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "An error occurred while processing your request." });
+    }
+});
+
+//an endpoint which will take the filmobject and user question within the film chat feature
+app.post('/api/filmchatquestion', async (req, res) => {
+    req.setTimeout(300000); // 5 minutes
+    try {
+        let filmchat_filtered_dict;
+
+        // Retrieve film objects for the requested page number
+        const filmobject = req.body.filmobject
+        const question = req.body.question
+        filmchat_filtered_dict = await filmchatengine(question, filmobject);
+        // Send both film list and the number of pages to the frontend
+        res.json( filmchat_filtered_dict );
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "An error occurred while processing your request." });
