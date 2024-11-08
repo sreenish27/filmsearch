@@ -9,6 +9,7 @@ import logging
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 from search_engine import search  # Import the search function from search_engine
+from filmchat_engine import filmchatengine
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +30,10 @@ class SentenceInput(BaseModel):
 
 class SearchQuery(BaseModel):
     query: str  # User's text query
+    vector: List[float]  # Precomputed vector for the user query
+
+class filmchatQuery(BaseModel):
+    filmobject: dict  # User's text query
     vector: List[float]  # Precomputed vector for the user query
 
 # Configure CORS
@@ -58,6 +63,18 @@ async def perform_search(query: SearchQuery):
     try:
         # Pass both the query string and the vector to the search function
         results = search(query.query, query.vector)
+        return {"results": results}
+    except Exception as e:
+        # Log the exception for debugging
+        logger.error("Search failed", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+# `filmchat` endpoint to handle question queries within a paritcular film (film chat) feature - returns the aspect of the film to focus on for answering the question
+@app.post("/filmchat")
+async def answer_filmquestion(query: filmchatQuery):
+    try:
+        # Pass both the query string and the vector to the search function
+        results = filmchatengine(query.vector, query.filmobject)
         return {"results": results}
     except Exception as e:
         # Log the exception for debugging
