@@ -29,6 +29,7 @@ const BASIC_QUESTIONS = [
 ]
 
 const PLACEHOLDER_PROMPTS = [
+  // Original English Prompts
   "Most visually stunning sci-fi films of the 21st century with groundbreaking special effects",
   "Movies with non-linear narratives that challenge perception of time and reality",
   "Surrealist films that blur the line between reality and dreams, leaving audiences perplexed",
@@ -40,15 +41,54 @@ const PLACEHOLDER_PROMPTS = [
   "Films with ambiguous endings that leave audiences debating interpretations for years",
   "Visually striking arthouse films with complex symbolic imagery and metaphors",
   "Mind-bending movies that require multiple viewings to fully grasp their intricate plots",
-  "Films exploring parallel universes or alternate realities, challenging our perception of existence"
+  "Films exploring parallel universes or alternate realities, challenging our perception of existence",
+
+  // Indian Languages
+  "21वीं सदी की सबसे खूबसूरत साइंस-फिक्शन फिल्में जो विशेष प्रभावों के मामले में मील का पत्थर साबित हुईं" ,
+  "கண்கொள்ளாக் காட்சியளிக்கும் 21வது நூற்றாண்டின் சயின்ஸ் பிக்‌ஷன் திரைப்படங்கள்",
+  "21వ శతాబ్దం యొక్క అద్భుతమైన సైన్స్ ఫిక్షన్ చిత్రాలు" ,
+  "२१ व्या शतकातील सर्वात सुंदर विज्ञान-कथा चित्रपट ज्यांनी विशेष प्रभावात नवीन मानके घालून दिली" ,
+  "২১ শতকের সেরা ভিজ্যুয়ালি স্টানিং সাই-ফাই সিনেমাগুলি যা বিশেষ প্রভাবের ক্ষেত্রে মাইলফলক স্থাপন করেছে" ,
+
+  // Globally Spoken Languages
+  "Las películas de ciencia ficción más impresionantes del siglo XXI con efectos especiales revolucionarios" ,
+  "Les films de science-fiction les plus visuellement saisissants du 21e siècle avec des effets spéciaux révolutionnaires" ,
+  "21世紀の最も視覚的に驚くべきSF映画、画期的な特殊効果を備えたもの" ,
+  "Die visuell atemberaubendsten Sci-Fi-Filme des 21. Jahrhunderts mit bahnbrechenden Spezialeffekten" ,
+  "Самые визуально впечатляющие научно-фантастические фильмы XXI века с новаторскими спецэффектами"
 ]
+
 
 const TRANSLATIONS = [
   { language: 'English', word: 'Film' },
   { language: 'Spanish', word: 'Película' },
   { language: 'French', word: 'Film' },
   { language: 'Japanese', word: '映画' },
-  { language: 'German', word: 'Film' }
+  { language: 'German', word: 'Film' },
+
+  // Top 10 Indian languages
+  { language: 'Hindi', word: 'फ़िल्म' },
+  { language: 'Bengali', word: 'ছবি' },
+  { language: 'Tamil', word: 'திரைப்படம்' },
+  { language: 'Telugu', word: 'సినిమా' },
+  { language: 'Marathi', word: 'चित्रपट' },
+  { language: 'Gujarati', word: 'ફિલ્મ' },
+  { language: 'Kannada', word: 'ಚಿತ್ರ' },
+  { language: 'Malayalam', word: 'ചലച്ചിത്രം' },
+  { language: 'Punjabi', word: 'ਫ਼ਿਲਮ' },
+  { language: 'Odia', word: 'ଫିଲ୍ମ' },
+
+  // Additional 10 globally popular languages
+  { language: 'Mandarin Chinese', word: '电影' },
+  { language: 'Russian', word: 'Фильм' },
+  { language: 'Portuguese', word: 'Filme' },
+  { language: 'Italian', word: 'Film' },
+  { language: 'Arabic', word: 'فيلم' },
+  { language: 'Korean', word: '영화' },
+  { language: 'Turkish', word: 'Film' },
+  { language: 'Dutch', word: 'Film' },
+  { language: 'Swedish', word: 'Film' },
+  { language: 'Polish', word: 'Film' }
 ]
 
 export default function FilmSearch() {
