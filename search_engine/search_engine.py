@@ -13,6 +13,7 @@ b = 0.75
 initial_ratio_threshold = 0.5
 long_query_threshold = 7
 DEFAULT_DOC_LENGTH = 1000
+MIN_RESULTS_THRESHOLD = 3  # Minimum number of results before trying word dropping
 
 def queryprocessor(query):
     q_list = re.split(r'\W+', query.lower())
@@ -93,6 +94,8 @@ def get_search_results(word_list, query_vector):
     words_dropped = 0
     min_words_required = 2
 
+    best_results = []  # Keep track of best results found so far
+
     while len(filtered_words) >= min_words_required:
         # Step 4: Calculate BM25 scores
         film_scores = defaultdict(float)
@@ -121,33 +124,45 @@ def get_search_results(word_list, query_vector):
             if len(films_with_all_words[film_id]) == len(filtered_words)
         }
 
-        # If we found results, return them
+        # If we found results, evaluate them
         if final_film_scores:
             ranked_films = sorted(final_film_scores.items(), key=lambda item: item[1], reverse=True)
             ranked_film_ids = [film_id for film_id, _ in ranked_films]
-            
-            if words_dropped > 0:
-                print(f"\nFound results after dropping {words_dropped} words")
-                print(f"Final words used: {filtered_words}")
-            return ranked_film_ids
+            results_count = len(ranked_film_ids)
 
-        # No results - drop lowest scoring words
+            # Keep track of best results found
+            if not best_results or len(ranked_film_ids) >= MIN_RESULTS_THRESHOLD:
+                best_results = ranked_film_ids
+
+            # If we have enough results (>= 3), return them
+            if results_count >= MIN_RESULTS_THRESHOLD:
+                if words_dropped > 0:
+                    print(f"\nFound {results_count} results after dropping {words_dropped} words")
+                    print(f"Final words used: {filtered_words}")
+                return ranked_film_ids
+            
+            print(f"\nFound only {results_count} results, trying with fewer words...")
+
+        # No results or too few results - drop lowest scoring words
         words_to_drop = min(words_per_drop, len(filtered_words) - min_words_required)
         if words_to_drop <= 0:
-            print("\nReached minimum word limit without finding results")
-            return []
+            break
 
-        # Sort words by FULL composite score and drop lowest scoring ones
         sorted_words = sorted(filtered_words, key=lambda w: word_composite_scores[w])
         words_being_dropped = sorted_words[:words_to_drop]
         filtered_words = sorted_words[words_to_drop:]
         words_dropped += words_to_drop
 
-        print(f"\nNo results found. Dropping {words_to_drop} words: {words_being_dropped}")
+        print(f"\nDropping {words_to_drop} words: {words_being_dropped}")
         print(f"Words dropped so far: {words_dropped}")
         print(f"Remaining words: {filtered_words}")
 
-    print("\nNo results found after dropping words to minimum threshold")
+    # If we've exhausted all possibilities, return best results found
+    if best_results:
+        print(f"\nReturning best results found ({len(best_results)} results)")
+        return best_results
+
+    print("\nNo results found after all attempts")
     return []
 
 def search(user_query, user_query_vector):
