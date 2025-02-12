@@ -111,7 +111,7 @@ async def extract_data(request: answerQuery):
                     "content": prompt
                 }
             ],
-            model="llama-3.1-70b-versatile"  # Ensure this model is supported
+            model="llama-3.3-70b-versatile"  # Ensure this model is supported
         )
 
         # Extract the content from the response
