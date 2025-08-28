@@ -15,8 +15,8 @@ This project demonstrates an end-to-end implementation of a modern information r
 
 > The project has already proven its value. I received unsolicited feedback from a startup founder who was able to find a niche Japanese animated film using my tool, something they couldn't do with traditional search. This demonstrates a clear product-market fit for users who need a more intuitive discovery tool.
 
-![Screenshot of founder feedback email](<img width="700" height="591" alt="Screenshot 2025-08-28 at 11 18 40 AM" src="https://github.com/user-attachments/assets/1221d4f8-9682-4786-b13e-a5cfd99ba8c3" />
-g)
+<img width="700" height="591" alt="Screenshot 2025-08-28 at 11 18 40 AM" src="https://github.com/user-attachments/assets/1221d4f8-9682-4786-b13e-a5cfd99ba8c3" />
+g
 
 -----
 
