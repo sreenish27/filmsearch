@@ -110,10 +110,6 @@ While the engine is highly effective, there are several areas for future improve
 
 -----
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
-
 ## 👤 Author
 
   * **Krithik Sai Sreenish G** - [GitHub Profile](https://github.com/sreenish27)
