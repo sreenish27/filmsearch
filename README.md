@@ -112,4 +112,4 @@ While the engine is highly effective, there are several areas for future improve
 
 ## 👤 Author
 
-  * **Krithik Sai Sreenish G** - [GitHub Profile](https://github.com/sreenish27)
+  * **Krithik Sai Sreenish G** - [Profile](https://sreenish27.github.io/krithik/)
