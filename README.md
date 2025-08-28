@@ -1,76 +1,114 @@
-# Film Search Platform
+# FilmSearch: A Semantic Search Engine for Movie Discovery
 
-A film discovery platform with multi-zone search architecture for finding movies and TV shows based on specific themes, ideas, and cultural contexts.
+FilmSearch is a full-stack, custom-built search engine designed to help users discover films through complex, natural language queries. It goes beyond simple keyword matching to understand user intent, delivering relevant results for vague or descriptive searches like *"films about love and space"* or *"dystopian sci-fi with a rogue AI."*
 
-## Key Features
+This project demonstrates an end-to-end implementation of a modern information retrieval system, from data scraping and processing to building a custom ranking algorithm and deploying a user-facing web application.
 
-- **Multi-Zone Search Engine**: Natural language search across title, synopsis, director's notes, location, and genre zones
-- **Zone-Based Relevance Ranking**: Intelligent content zone prioritization based on query context
-- **Interactive Movie Cards**: Chat interface for detailed film information
-- **Comprehensive Database**: Web crawler-indexed films with rich metadata
+-----
 
-## Technology Stack
+## 🎬 Live Demo & Links
 
-### Backend
-- FastAPI (Python)
-- PostgreSQL (Supabase)
+  * **Live Application:** **[filmsearch-kappa.vercel.app](https://filmsearch-kappa.vercel.app/)**
+  * **Video Walkthrough:** **[Loom Demo](https://www.google.com/search?q=https://www.loom.com/share/df7dfc3116654913bf5fe05c97d909b7)**
+  * **Technical Article:** **[Read the deep-dive article here](https://medium.com/@krithikintl/building-a-semantic-search-engine-with-bm25-and-query-relaxation-a-deep-dive-0a24f5e2819d)**
 
-### Frontend
-- Next.js
-- Tailwind CSS
+-----
 
-### Search Architecture
-- Zone-specific TF-IDF calculations
-- BM25 scoring system
-- Vector-based semantic matching
+## ✨ Key Features
 
-### Hosting
-- Vercel (Frontend + Backend API)
-- Render (FastAPI service)
+  * **Natural Language Understanding:** Accepts complex, conversational queries instead of just keywords.
+  * **Custom BM25 Engine:** The core ranking logic is a from-scratch implementation of the Okapi BM25 algorithm for powerful lexical scoring.
+  * **Intelligent Query Relaxation:** If a search is too specific and yields no results, the engine automatically drops the least important terms and re-runs the search to ensure you always find something.
+  * **Semantic Zone Selection:** Uses sentence-transformer embeddings to identify the user's intent and intelligently focus the search on the most relevant data fields (e.g., `plot`, `actors`, `director`).
+  * **End-to-End Data Pipeline:** Includes a Scrapy-based web scraper for data acquisition from Wikipedia, a processing pipeline, and a PostgreSQL database on Supabase.
 
-## Setup Instructions
+-----
 
-1. **Prerequisites**:
-   - Python (>=3.x)
-   - Node.js (>=14.x.x)
-   - Supabase Account
-   - Vercel Account
-   - Render Account
+## 🛠️ Technology Stack
 
-2. **Clone and Install**:
-```bash
-git clone https://github.com/your-repo/film-search-platform.git
-cd film-search-platform
+  * **Backend:** Python, Flask
+  * **Database:** PostgreSQL (hosted on Supabase)
+  * **Data & ML:** Scrapy, Pandas, NLTK, Sentence-Transformers (Hugging Face), Scikit-learn
+  * **Frontend:** React, Next.js
+  * **Deployment:** Vercel
 
-# Frontend
-npm install
+-----
 
-# Backend
-cd api
-pip install -r requirements.txt
-```
+## 🏗️ Architecture Overview
 
-3. **Environment Variables**:
-```
-# .env
-SUPABASE_URL=
-SUPABASE_KEY=
-NEXT_PUBLIC_API_URL=
-```
+The search process is a multi-stage pipeline designed to maximize both relevance (precision) and discovery (recall).
 
-4. **Development**:
-```bash
-# Frontend
-npm run dev
+1.  **Semantic Intent Recognition:** The user's query is first vectorized using a sentence-transformer model. This vector is compared against the vectors of the data "zones" (e.g., `plot`, `title`). The zones with the highest cosine similarity are selected as the primary targets for the search. This quickly narrows down the search space to the most relevant areas.
 
-# Backend
-uvicorn main:app --reload
-```
+2.  **Strict BM25 Search:** Using the selected zones, the custom BM25 engine performs a strict search. It requires that a film contain **all** of the query's keywords. This ensures that if a perfect match exists, it will be found with high confidence.
 
-## Contributing
+3.  **Intelligent Query Relaxation:** If the strict search returns too few results, the engine's most innovative feature kicks in. It uses a pre-calculated importance score for each word to identify the least critical terms in the query. It then iteratively drops these terms and re-runs the search until a sufficient number of relevant films are found.
 
-Open issues or submit pull requests to help improve the platform.
+-----
 
-## License
+## 🚀 Getting Started
 
-MIT License
+Follow these instructions to get a local copy up and running for development and testing purposes.
+
+### Prerequisites
+
+  * Python 3.10+
+  * Pip package manager
+
+### Installation
+
+1.  **Clone the repository:**
+
+    ```sh
+    git clone https://github.com/sreenish27/filmsearch.git
+    cd filmsearch
+    ```
+
+2.  **Create and activate a virtual environment:**
+
+    ```sh
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+
+3.  **Install dependencies:**
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4.  **Set up environment variables:**
+    Create a `.env` file in the root directory and add your Supabase credentials:
+
+    ```
+    SUPABASE_URL="YOUR_SUPABASE_URL"
+    SUPABASE_KEY="YOUR_SUPABASE_ANON_KEY"
+    ```
+
+5.  **Run the application:**
+
+    ```sh
+    flask run
+    ```
+
+    The backend API will be available at `http://127.0.0.1:5000`.
+
+-----
+
+## 🔮 Limitations & Future Work
+
+While the engine is highly effective, there are several areas for future improvement:
+
+  * **Performance Optimization:** The current implementation makes multiple calls to the database per query. This could be refactored into a single, more complex query to significantly reduce latency.
+  * **BM25 Enhancements:** The document length (`|D|`) parameter in the BM25 formula is currently approximated. Using the actual length of each zone would improve ranking accuracy.
+  * **True Hybrid Search:** The next evolution would be to combine the BM25 lexical score and a vector-based semantic score into a single, unified ranking formula.
+
+-----
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
+
+## 👤 Author
+
+  * **Krithik Sai Sreenish G** - [GitHub Profile](https://github.com/sreenish27)
