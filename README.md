@@ -9,7 +9,7 @@ This project demonstrates an end-to-end implementation of a modern information r
 ## 🎬 Live Demo & Links
 
   * **Live Application:** **[filmsearch-kappa.vercel.app](https://filmsearch-kappa.vercel.app/)**
-  * **Video Walkthrough:** **[Loom Demo](https://www.google.com/search?q=https://www.loom.com/share/df7dfc3116654913bf5fe05c97d909b7)**
+  * **Video Walkthrough:** **[Loom Demo](https://www.loom.com/share/df7dfc3116654913bf5fe05c97d909b7?sid=1323dae3-f9d0-4783-a884-a66ed147e8af)**
   * **Technical Article:** **[Read the deep-dive article here](https://medium.com/@krithikintl/building-a-semantic-search-engine-with-bm25-and-query-relaxation-a-deep-dive-0a24f5e2819d)**
 ## ✨ Real-World Impact & User Testimonials
 
