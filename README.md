@@ -31,7 +31,7 @@ This project demonstrates an end-to-end implementation of a modern information r
 
 ## 🛠️ Technology Stack
 
-  * **Backend:** Python, Flask
+  * **Backend:** Python, Node.js
   * **Database:** PostgreSQL (hosted on Supabase)
   * **Data & ML:** Scrapy, Pandas, NLTK, Sentence-Transformers (Hugging Face), Scikit-learn
   * **Frontend:** React, Next.js
