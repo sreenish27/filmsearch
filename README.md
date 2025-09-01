@@ -51,55 +51,6 @@ The search process is a multi-stage pipeline designed to maximize both relevance
 
 -----
 
-## 🚀 Getting Started
-
-Follow these instructions to get a local copy up and running for development and testing purposes.
-
-### Prerequisites
-
-  * Python 3.10+
-  * Pip package manager
-
-### Installation
-
-1.  **Clone the repository:**
-
-    ```sh
-    git clone https://github.com/sreenish27/filmsearch.git
-    cd filmsearch
-    ```
-
-2.  **Create and activate a virtual environment:**
-
-    ```sh
-    python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-    ```
-
-3.  **Install dependencies:**
-
-    ```sh
-    pip install -r requirements.txt
-    ```
-
-4.  **Set up environment variables:**
-    Create a `.env` file in the root directory and add your Supabase credentials:
-
-    ```
-    SUPABASE_URL="YOUR_SUPABASE_URL"
-    SUPABASE_KEY="YOUR_SUPABASE_ANON_KEY"
-    ```
-
-5.  **Run the application:**
-
-    ```sh
-    flask run
-    ```
-
-    The backend API will be available at `http://127.0.0.1:5000`.
-
------
-
 ## 🔮 Limitations & Future Work
 
 While the engine is highly effective, there are several areas for future improvement:
